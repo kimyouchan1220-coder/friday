@@ -19,6 +19,7 @@ dialog label{display:block;margin:8px 0 2px;font-size:13px;color:#9fb0cf}dialog 
 <label>Gemini API 키 (이 기기 브라우저에만 저장)</label><input id="k" type="password">
 <label>모델 <button id="ml" type="button">목록 조회</button></label><select id="m"></select>
 <label>음성 (여성 음성 선택)</label><select id="v"></select>
+<label>Alpha Vantage 키 (주가 조회용, 이 기기 브라우저에만 저장)</label><input id="av" type="password">
 <label>말하기 속도</label><input id="r" type="range" min=".7" max="1.5" step=".1" value="1.05">
 <p style="text-align:right"><button id="x" type="button">기록 삭제</button> <button id="ok">저장</button></p></dialog>
 <script>
@@ -35,11 +36,21 @@ function say(t){return new Promise(res=>{if(!speak||!t)return res();speechSynthe
  u.lang="ko-KR";const v=V.find(x=>x.name===(L.f_v||$("v").value));if(v)u.voice=v;u.rate=+(L.f_r||1.05);
  u.onend=u.onerror=()=>{res();if(wake)setTimeout(listen,400)};speechSynthesis.speak(u)})}
 const LJ=k=>{try{return JSON.parse(L[k]||"[]")}catch(_){return[]}},LS=(k,v)=>{try{L[k]=JSON.stringify(v)}catch(_){}};
+const AL={"엔비디아":"NVDA","코카콜라":"KO","아이온큐":"IONQ","로켓랩":"RKLB","테슬라":"TSLA","애플":"AAPL","마이크로소프트":"MSFT","구글":"GOOGL","알파벳":"GOOGL","아마존":"AMZN","메타":"META","인텔":"INTC","에이엠디":"AMD","팔란티어":"PLTR","브이오오":"VOO","슈드":"SCHD","제이이피아이":"JEPI"};
+const nm=y=>Object.keys(AL).find(k=>AL[k]===y)||y;
+function symOf(t){for(const k in AL)if(t.includes(k))return AL[k];const m=t.match(/\b[A-Z]{1,5}\b/);return m?m[0]:null}
+async function quote(list){const key=L.f_av;if(!key)return"설정에서 Alpha Vantage 키를 먼저 입력하세요.";const out=[];
+ for(const y of list){try{const r=await fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol="+encodeURIComponent(y)+"&apikey="+encodeURIComponent(key));const j=await r.json(),g=j["Global Quote"];
+  if(!g||!g["05. price"]){out.push(j.Note||j.Information?"호출 한도에 도달했거나 키에 문제가 있습니다.":nm(y)+" 시세를 찾지 못했습니다. 티커를 확인하세요.");if(j.Note||j.Information)break;continue}
+  const c=+g["09. change"],pc=g["10. change percent"].replace("%","");
+  out.push(nm(y)+" "+(+g["05. price"]).toFixed(2)+"달러, 전일 대비 "+Math.abs(c).toFixed(2)+"달러 "+(c>=0?"상승":"하락")+", "+Math.abs(+pc).toFixed(2)+"퍼센트. 기준 거래일 "+g["07. latest trading day"]+".")}
+ catch(e){return"시세 서버에 연결하지 못했습니다. 브라우저 차단이나 네트워크 문제일 수 있습니다."}}
+ return out.join(" ")+" 참고용 시세이며 지연될 수 있습니다."}
 let timers=[],pend=null;
 const fmt=n=>{const h=Math.floor(n/3600),m=Math.floor(n%3600/60),x=n%60;return[h?h+"시간":"",m?m+"분":"",x?x+"초":""].filter(Boolean).join(" ")||"0초"};
 const nowStr=()=>new Date().toLocaleString("ko-KR",{dateStyle:"full",timeStyle:"short"});
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},600)}catch(_){}}
-const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 현재 시각과 날짜 3) 타이머 (예: 10분 타이머, 1시간 30분 뒤에 알려줘) 4) 메모 (예: 메모 우유 사기, 메모 목록, 메모 전체 삭제) 5) 할 일 (예: 할 일 추가 운동, 할 일 목록, 할 일 1번 완료). 메모와 할 일은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
+const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 현재 시각과 날짜 3) 타이머 (예: 10분 타이머, 1시간 30분 뒤에 알려줘) 4) 메모 (예: 메모 우유 사기, 메모 목록, 메모 전체 삭제) 5) 할 일 (예: 할 일 추가 운동, 할 일 목록, 할 일 1번 완료) 6) 미국 주가 조회 (예: 엔비디아 주가, NVDA 시세, 관심종목 추가 엔비디아, 관심종목 시세). 메모와 할 일은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
 const LIST=(a,e)=>a.length?a.map((x,i)=>(i+1)+"번 "+x).join(". "):e;
 function local(t){t=t.trim().replace(/[.!?]+$/,"");
  if(pend){const k=pend;pend=null;if(/^(확인|응|네|예|그래|삭제)/.test(t)){if(k==="n")LS("f_notes",[]);else LS("f_todos",[]);return k==="n"?"메모를 모두 삭제했습니다.":"할 일을 모두 삭제했습니다."}return"취소했습니다."}
@@ -51,6 +62,12 @@ function local(t){t=t.trim().replace(/[.!?]+$/,"");
   if(sec<1||sec>86400)return"타이머는 1초 이상 24시간 이하로 설정할 수 있습니다.";
   const label=fmt(sec),id=setTimeout(()=>{timers=timers.filter(x=>x.id!==id);beep();const m=label+" 타이머가 끝났습니다.";add("f",m);say(m)},sec*1000);
   timers.push({id,end:Date.now()+sec*1000,label});return label+" 타이머를 시작합니다. 이 탭을 열어 두세요."}
+ if(/관심\s*종목/.test(t)&&!/^(메모|할\s*일)/.test(t)){let w=LJ("f_wl"),m2;
+  if(m2=t.match(/관심\s*종목\s*(추가|등록)\s*(.+)$/)){const y=symOf(m2[2]);if(!y)return"종목을 알아듣지 못했습니다. 영문 티커로 말씀해 주세요.";if(!w.includes(y)){w.push(y);LS("f_wl",w)}return nm(y)+" 관심종목에 추가했습니다. 현재 "+w.length+"개입니다."}
+  if(m2=t.match(/관심\s*종목\s*(삭제|제거)\s*(.+)$/)){const y=symOf(m2[2]);w=w.filter(x=>x!==y);LS("f_wl",w);return y?nm(y)+" 삭제했습니다.":"종목을 알아듣지 못했습니다."}
+  if(/(시세|주가)/.test(t)){if(!w.length)return"관심종목이 없습니다. 관심종목 추가 엔비디아처럼 말씀해 주세요.";return quote(w.slice(0,8))}
+  return w.length?"관심종목: "+w.map(nm).join(", "):"관심종목이 없습니다."}
+ if(/(주가|시세)/.test(t)&&!/^(메모|할\s*일)/.test(t)){const y=symOf(t);return y?quote([y]):"종목을 알아듣지 못했습니다. 등록된 이름이나 영문 티커로 말씀해 주세요."}
  if(/몇\s*시(?!간)|지금\s*시간|현재\s*시간|시간\s*알려/.test(t)){const d=new Date(),h=d.getHours(),mi=d.getMinutes();return"지금은 "+(h<12?"오전 ":"오후 ")+(h%12||12)+"시 "+(mi?mi+"분":"정각")+"입니다."}
  if(/(오늘|지금).*(날짜|며칠|몇\s*일|요일)|무슨\s*요일|며칠이야/.test(t))return"오늘은 "+new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric",weekday:"long"})+"입니다.";
  if(/^메모\s*(목록|리스트|읽어|보여|확인)/.test(t)){return LIST(LJ("f_notes"),"저장된 메모가 없습니다.")}
@@ -64,7 +81,7 @@ function local(t){t=t.trim().replace(/[.!?]+$/,"");
  m=t.match(/^할\s*일\s*(?:추가|등록)\s*[:,]?\s*(.+)$/);
  if(m){const a=LJ("f_todos");a.push(m[1].trim());LS("f_todos",a);return"할 일에 추가했습니다. 현재 "+a.length+"개입니다."}
  return null}
-async function ask(q){q=q.trim();if(busy||!q)return;const lr=local(q);if(lr!==null){add('u',q);add('f',lr);await say(lr);return}const key=L.f_k;
+async function ask(q){q=q.trim();if(busy||!q)return;const lr=await local(q);if(lr!==null){add('u',q);add('f',lr);await say(lr);return}const key=L.f_k;
  if(!key){add("e","설정에서 API 키를 먼저 입력하세요.");$("cfg").click();return}
  busy=true;add("u",q);H.push({role:"user",parts:[{text:q}]});const w=add("f","…");
  try{const r=await fetch(`${API}/${L.f_m||"gemini-3.8-flash"}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify({systemInstruction:{parts:[{text:SYS+" 현재 시각: "+nowStr()+". 할 일·메모·타이머는 앱이 직접 처리하므로 대신 처리하는 척하지 않는다."}]},contents:H})});
@@ -87,14 +104,14 @@ $("go").onclick=()=>{const q=$("t").value;$("t").value="";ask(q)};
 $("t").onkeydown=e=>{if(e.key==="Enter")$("go").click()};
 const icon=()=>$("sp").textContent=speak?"🔊":"🔇";icon();
 $("sp").onclick=()=>{speak=!speak;L.f_s=speak?"1":"0";icon();if(!speak)speechSynthesis.cancel()};
-$("cfg").onclick=()=>{$("k").value=L.f_k||"";$("r").value=L.f_r||"1.05";$("m").innerHTML=`<option>${L.f_m||"gemini-3.8-flash"}</option>`;loadV();$("d").showModal()};
+$("cfg").onclick=()=>{$("k").value=L.f_k||"";$("r").value=L.f_r||"1.05";$("av").value=L.f_av||"";$("m").innerHTML=`<option>${L.f_m||"gemini-3.8-flash"}</option>`;loadV();$("d").showModal()};
 $("ml").onclick=async()=>{const k=$("k").value.trim()||L.f_k;if(!k)return alert("키를 먼저 입력하세요.");
  try{const j=await(await fetch(`${API}?pageSize=200`,{headers:{"x-goog-api-key":k}})).json();
   const a=(j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")&&/flash/.test(m.name)&&!/tts|image|live|audio|robot|computer/.test(m.name)).map(m=>m.name.replace("models/",""));
   if(!a.length)return alert("사용 가능한 모델이 없습니다. 키를 확인하세요.");
   $("m").innerHTML=a.map(n=>`<option>${n}</option>`).join("");$("m").value=a.includes(L.f_m)?L.f_m:a[0]
  }catch(e){alert("조회 실패: "+e.message)}};
-$("ok").onclick=()=>{L.f_k=$("k").value.trim();L.f_m=$("m").value;L.f_v=$("v").value;L.f_r=$("r").value;$("d").close()};
+$("ok").onclick=()=>{L.f_k=$("k").value.trim();L.f_m=$("m").value;L.f_v=$("v").value;L.f_av=$("av").value.trim();L.f_r=$("r").value;$("d").close()};
 $("x").onclick=()=>{H=[];save();$("log").innerHTML=""};
 let wake=false,act=false,ar,tm,lock,fails=0,rd=300;
 const WR=/프라이\s?데이|프라이\s?대이|friday/i,arm=()=>{clearTimeout(tm);tm=setTimeout(()=>{act=false},20000)};
