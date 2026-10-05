@@ -66,15 +66,15 @@ $("ml").onclick=async()=>{const k=$("k").value.trim()||L.f_k;if(!k)return alert(
  }catch(e){alert("조회 실패: "+e.message)}};
 $("ok").onclick=()=>{L.f_k=$("k").value.trim();L.f_m=$("m").value;L.f_v=$("v").value;L.f_r=$("r").value;$("d").close()};
 $("x").onclick=()=>{H=[];save();$("log").innerHTML=""};
-let wake=false,act=false,ar,tm,lock;
+let wake=false,act=false,ar,tm,lock,fails=0,rd=300;
 const WR=/프라이\s?데이|프라이\s?대이|friday/i,arm=()=>{clearTimeout(tm);tm=setTimeout(()=>{act=false},20000)};
 const ui=()=>{$("wk").style.background=wake?"#0a7":"";$("wk").textContent=wake?"👂 대기중":"👂"};
 function pauseL(){if(ar){ar.onend=null;ar.abort();ar=null}}
 function listen(){if(!wake||ar||speechSynthesis.speaking)return;
  ar=new SR();ar.lang="ko-KR";ar.continuous=true;ar.interimResults=false;
  ar.onresult=e=>heard(e.results[e.resultIndex][0].transcript.trim());
- ar.onerror=e=>{if(/not-allowed|service-not-allowed/.test(e.error)){wake=false;ui();add("e","마이크 권한이 필요합니다.")}};
- ar.onend=()=>{ar=null;setTimeout(listen,300)};
+ ar.onerror=e=>{if(e.error==="network")rd=3000;if(/not-allowed|service-not-allowed/.test(e.error)){wake=false;fails++;ui();add("e","마이크 권한이 필요합니다. 주소창 왼쪽 아이콘에서 마이크를 허용한 뒤 화면을 한 번 터치하세요.")}};
+ ar.onend=()=>{ar=null;setTimeout(listen,rd);rd=300};
  try{ar.start()}catch(_){}}
 async function say2(t){add("f",t);await say(t)}
 async function heard(t){if(busy)return;
@@ -85,10 +85,16 @@ async function heard(t){if(busy)return;
 async function cmd(t){clearTimeout(tm);
  if(/^(종료|그만|끝|대기)(해|할게|해줘)?[\s.!]*$/.test(t)){act=false;return say2("대기 모드로 전환합니다.")}
  await ask(t);arm()}
-$("wk").onclick=()=>{if(!SR)return add("e","이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용하세요.");
- wake=!wake;act=false;
- if(wake){speak=true;L.f_s="1";icon();add("e","대기 시작: '프라이데이'라고 불러 보세요. 이 탭을 열고 화면을 켜 둬야 합니다.");
-  if(navigator.wakeLock)navigator.wakeLock.request("screen").then(l=>lock=l).catch(()=>{});listen()}
- else{pauseL();speechSynthesis.cancel();if(lock)lock.release()}ui()};
+function getLock(){if(navigator.wakeLock&&!lock)navigator.wakeLock.request("screen").then(l=>{lock=l;l.onrelease=()=>{lock=null}}).catch(()=>{})}
+function startWake(manual){if(!SR||wake)return;wake=true;act=false;
+ if(manual){speak=true;L.f_s="1";icon();fails=0}
+ L.f_w="1";add("e","상시 대기 중입니다. '프라이데이'라고 불러 보세요. 이 탭을 열고 화면을 켜 둬야 합니다.");
+ getLock();listen();ui()}
+function stopWake(){wake=false;act=false;L.f_w="0";pauseL();speechSynthesis.cancel();if(lock){lock.release();lock=null}ui()}
+$("wk").onclick=()=>{if(!SR)return add("e","이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용하세요.");wake?stopWake():startWake(true)};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&wake){getLock();listen()}});
+if(SR&&L.f_w!=="0"){startWake(false);
+ const kick=()=>{if(L.f_w!=="0"&&!wake&&fails<3)startWake(false)};
+ ["pointerdown","keydown","touchstart"].forEach(ev=>document.addEventListener(ev,kick,{passive:true}))}
 H.length?H.forEach(h=>add(h.role==="user"?"u":"f",h.parts[0].text)):add("f","프라이데이 대기 중입니다.");
 </script></body></html>
