@@ -34,10 +34,40 @@ speechSynthesis.onvoiceschanged=loadV;loadV();
 function say(t){return new Promise(res=>{if(!speak||!t)return res();speechSynthesis.cancel();pauseL();const u=new SpeechSynthesisUtterance(t.replace(/[*#`_>~]/g,""));
  u.lang="ko-KR";const v=V.find(x=>x.name===(L.f_v||$("v").value));if(v)u.voice=v;u.rate=+(L.f_r||1.05);
  u.onend=u.onerror=()=>{res();if(wake)setTimeout(listen,400)};speechSynthesis.speak(u)})}
-async function ask(q){q=q.trim();if(busy||!q)return;const key=L.f_k;
+const LJ=k=>{try{return JSON.parse(L[k]||"[]")}catch(_){return[]}},LS=(k,v)=>{try{L[k]=JSON.stringify(v)}catch(_){}};
+let timers=[],pend=null;
+const fmt=n=>{const h=Math.floor(n/3600),m=Math.floor(n%3600/60),x=n%60;return[h?h+"시간":"",m?m+"분":"",x?x+"초":""].filter(Boolean).join(" ")||"0초"};
+const nowStr=()=>new Date().toLocaleString("ko-KR",{dateStyle:"full",timeStyle:"short"});
+function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},600)}catch(_){}}
+const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 현재 시각과 날짜 3) 타이머 (예: 10분 타이머, 1시간 30분 뒤에 알려줘) 4) 메모 (예: 메모 우유 사기, 메모 목록, 메모 전체 삭제) 5) 할 일 (예: 할 일 추가 운동, 할 일 목록, 할 일 1번 완료). 메모와 할 일은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
+const LIST=(a,e)=>a.length?a.map((x,i)=>(i+1)+"번 "+x).join(". "):e;
+function local(t){t=t.trim().replace(/[.!?]+$/,"");
+ if(pend){const k=pend;pend=null;if(/^(확인|응|네|예|그래|삭제)/.test(t)){if(k==="n")LS("f_notes",[]);else LS("f_todos",[]);return k==="n"?"메모를 모두 삭제했습니다.":"할 일을 모두 삭제했습니다."}return"취소했습니다."}
+ if(/도움말|(뭘|뭐|무엇).*(할\s*수|도와)|할\s*수\s*있는\s*(일|기능|거)|기능\s*(알려|설명)/.test(t))return HELP;
+ if(/타이머.*(취소|끄|꺼|중지|멈춰)/.test(t)){const n=timers.length;timers.forEach(x=>clearTimeout(x.id));timers=[];return n?"타이머를 모두 취소했습니다.":"실행 중인 타이머가 없습니다."}
+ if(/타이머.*(남았|확인|몇|뭐)/.test(t)){const now=Date.now();timers=timers.filter(x=>x.end>now);return timers.length?timers.map(x=>x.label+" 타이머 "+fmt(Math.ceil((x.end-now)/1000))+" 남았습니다.").join(" "):"실행 중인 타이머가 없습니다."}
+ const tm=[...t.matchAll(/(\d+)\s*(시간|분|초)/g)];
+ if(tm.length&&/타이머|알려|알림|뒤에|후에/.test(t)&&!/메모|할\s*일/.test(t)){let sec=0;tm.forEach(m=>sec+=+m[1]*({"시간":3600,"분":60,"초":1}[m[2]]));
+  if(sec<1||sec>86400)return"타이머는 1초 이상 24시간 이하로 설정할 수 있습니다.";
+  const label=fmt(sec),id=setTimeout(()=>{timers=timers.filter(x=>x.id!==id);beep();const m=label+" 타이머가 끝났습니다.";add("f",m);say(m)},sec*1000);
+  timers.push({id,end:Date.now()+sec*1000,label});return label+" 타이머를 시작합니다. 이 탭을 열어 두세요."}
+ if(/몇\s*시(?!간)|지금\s*시간|현재\s*시간|시간\s*알려/.test(t)){const d=new Date(),h=d.getHours(),mi=d.getMinutes();return"지금은 "+(h<12?"오전 ":"오후 ")+(h%12||12)+"시 "+(mi?mi+"분":"정각")+"입니다."}
+ if(/(오늘|지금).*(날짜|며칠|몇\s*일|요일)|무슨\s*요일|며칠이야/.test(t))return"오늘은 "+new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric",weekday:"long"})+"입니다.";
+ if(/^메모\s*(목록|리스트|읽어|보여|확인)/.test(t)){return LIST(LJ("f_notes"),"저장된 메모가 없습니다.")}
+ if(/^메모\s*(전체\s*)?(삭제|지워|비워)/.test(t)){if(!LJ("f_notes").length)return"저장된 메모가 없습니다.";pend="n";return"메모를 모두 삭제할까요? 확인이라고 말씀하세요."}
+ let m=t.match(/^(.+?)\s*(?:라고|이라고)?\s*메모\s*(?:해\s*줘|해줘|해|저장해?줘?)$/)||t.match(/^메모(?:\s*(?:해\s*줘|해줘|해|저장해줘|저장|추가))?\s*[:,]?\s*(.+)$/);
+ if(m){const c=(m[1]||"").trim();if(!c||/^(줘|해\s*줘|해줘|해|저장|추가)$/.test(c))return"무엇을 메모할까요?";const a=LJ("f_notes");a.push(c);LS("f_notes",a);return"메모했습니다. "+a.length+"번 메모입니다."}
+ if(/^할\s*일\s*(목록|리스트|뭐|알려|읽어|보여|확인)/.test(t))return LIST(LJ("f_todos"),"할 일이 없습니다.");
+ if(/^할\s*일\s*(전체\s*)?(삭제|지워|비워)/.test(t)){if(!LJ("f_todos").length)return"할 일이 없습니다.";pend="t";return"할 일을 모두 삭제할까요? 확인이라고 말씀하세요."}
+ m=t.match(/^할\s*일\s*(\d+)\s*번?\s*(완료|끝|삭제)/);
+ if(m){const a=LJ("f_todos"),i=+m[1]-1;if(i<0||i>=a.length)return"그 번호의 할 일이 없습니다.";const d=a.splice(i,1)[0];LS("f_todos",a);return d+" 완료 처리했습니다. 남은 할 일은 "+a.length+"개입니다."}
+ m=t.match(/^할\s*일\s*(?:추가|등록)\s*[:,]?\s*(.+)$/);
+ if(m){const a=LJ("f_todos");a.push(m[1].trim());LS("f_todos",a);return"할 일에 추가했습니다. 현재 "+a.length+"개입니다."}
+ return null}
+async function ask(q){q=q.trim();if(busy||!q)return;const lr=local(q);if(lr!==null){add('u',q);add('f',lr);await say(lr);return}const key=L.f_k;
  if(!key){add("e","설정에서 API 키를 먼저 입력하세요.");$("cfg").click();return}
  busy=true;add("u",q);H.push({role:"user",parts:[{text:q}]});const w=add("f","…");
- try{const r=await fetch(`${API}/${L.f_m||"gemini-3.8-flash"}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify({systemInstruction:{parts:[{text:SYS}]},contents:H})});
+ try{const r=await fetch(`${API}/${L.f_m||"gemini-3.8-flash"}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify({systemInstruction:{parts:[{text:SYS+" 현재 시각: "+nowStr()+". 할 일·메모·타이머는 앱이 직접 처리하므로 대신 처리하는 척하지 않는다."}]},contents:H})});
   const j=await r.json();
   if(!r.ok)throw new Error(r.status==429?"무료 한도 초과입니다. 잠시 후 다시 시도하세요.":r.status==404?"모델명을 찾을 수 없습니다. 설정에서 모델 목록을 조회하세요.":(j.error&&j.error.message)||r.status);
   const c=j.candidates&&j.candidates[0],t=c&&c.content&&c.content.parts?c.content.parts.map(p=>p.text||"").join(""):"";
