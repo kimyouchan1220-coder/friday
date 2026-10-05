@@ -54,13 +54,68 @@ let timers=[],pend=null;
 const fmt=n=>{const h=Math.floor(n/3600),m=Math.floor(n%3600/60),x=n%60;return[h?h+"시간":"",m?m+"분":"",x?x+"초":""].filter(Boolean).join(" ")||"0초"};
 const nowStr=()=>new Date().toLocaleString("ko-KR",{dateStyle:"full",timeStyle:"short"});
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},600)}catch(_){}}
-const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 현재 시각과 날짜 3) 타이머 (예: 10분 타이머, 1시간 30분 뒤에 알려줘) 4) 메모 (예: 메모 우유 사기, 메모 목록, 메모 전체 삭제) 5) 할 일 (예: 할 일 추가 운동, 할 일 목록, 할 일 1번 완료) 6) 미국 주가 조회 (예: 엔비디아 주가, NVDA 시세, 관심종목 추가 엔비디아, 관심종목 시세). 메모와 할 일은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
+const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색). 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
 const LIST=(a,e)=>a.length?a.map((x,i)=>(i+1)+"번 "+x).join(". "):e;
+const CITY={"서울":[37.5665,126.978],"부산":[35.1796,129.0756],"인천":[37.4563,126.7052],"대구":[35.8714,128.6014],"대전":[36.3504,127.3845],"광주":[35.1595,126.8526],"울산":[35.5384,129.3114],"세종":[36.48,127.289],"수원":[37.2636,127.0286],"창원":[35.228,128.6811],"제주":[33.4996,126.5312],"포항":[36.019,129.3435],"김해":[35.2285,128.8894],"성남":[37.42,127.1267],"고양":[37.6584,126.832],"용인":[37.2411,127.1776],"청주":[36.6424,127.489],"전주":[35.8242,127.148],"천안":[36.8151,127.1139],"여수":[34.7604,127.6622],"춘천":[37.8813,127.7298],"강릉":[37.7519,128.8761]};
+const WX={0:"맑음",1:"대체로 맑음",2:"구름 조금",3:"흐림",45:"안개",48:"안개",51:"약한 이슬비",53:"이슬비",55:"강한 이슬비",56:"어는 이슬비",57:"어는 이슬비",61:"약한 비",63:"비",65:"강한 비",66:"어는 비",67:"어는 비",71:"약한 눈",73:"눈",75:"강한 눈",77:"싸락눈",80:"약한 소나기",81:"소나기",82:"강한 소나기",85:"눈 소나기",86:"강한 눈 소나기",95:"뇌우",96:"우박 동반 뇌우",99:"강한 우박 동반 뇌우"};
+async function geo(n){if(CITY[n])return{lat:CITY[n][0],lon:CITY[n][1],name:n};
+ const r=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(n)+"&count=5&language=ko"),j=await r.json(),a=(j.results||[]).sort((x,y)=>(y.population||0)-(x.population||0));
+ return a[0]?{lat:a[0].latitude,lon:a[0].longitude,name:n}:null}
+function gps(){return new Promise((ok,no)=>{if(!navigator.geolocation)return no();navigator.geolocation.getCurrentPosition(q=>ok({lat:q.coords.latitude,lon:q.coords.longitude,name:"현재 위치"}),no,{timeout:8000,maximumAge:3600000})})}
+async function weather(city,day){
+ try{let p;
+  if(city){p=await geo(city);if(!p)return city+" 지역을 찾지 못했습니다."}
+  else if(L.f_city){p=await geo(L.f_city);if(!p)return"기본 도시를 찾지 못했습니다. 도시 설정 부산처럼 다시 말씀해 주세요."}
+  else{try{p=await gps()}catch(_){return"위치를 알 수 없습니다. 도시 설정 부산처럼 말씀해 주세요."}}
+  const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+p.lat+"&longitude="+p.lon+"&current=temperature_2m,apparent_temperature,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2"),j=await r.json();
+  const d=j.daily,c=j.current;if(!d||!c)return"날씨 정보를 받지 못했습니다.";
+  const rn=x=>Math.round(x),pr=d.precipitation_probability_max[day],cond=WX[d.weather_code[day]]||"정보 없음";
+  const s=(day?p.name+" 내일 ":p.name+" 현재 "+rn(c.temperature_2m)+"도, 체감 "+rn(c.apparent_temperature)+"도, "+(WX[c.weather_code]||"")+". 오늘 ")+(day?cond+", ":"")+"최저 "+rn(d.temperature_2m_min[day])+"도, 최고 "+rn(d.temperature_2m_max[day])+"도"+(pr!=null?", 강수확률 "+pr+"퍼센트":"")+"."+(pr>=50?" 우산을 챙기세요.":"");
+  return s}
+ catch(e){return"날씨 서버에 연결하지 못했습니다."}}
+async function fxRate(){const key=L.f_av;if(!key)throw new Error("설정에서 Alpha Vantage 키를 먼저 입력하세요.");
+ const r=await fetch("https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=KRW&apikey="+encodeURIComponent(key)),j=await r.json(),g=j["Realtime Currency Exchange Rate"];
+ if(!g||!g["5. Exchange Rate"])throw new Error(j.Note||j.Information?"호출 한도에 도달했거나 키에 문제가 있습니다.":"환율을 받지 못했습니다.");return +g["5. Exchange Rate"]}
+async function fxSay(t){try{const rate=await fxRate(),m=t.match(/([\d,]+(?:\.\d+)?)\s*달러/);
+ if(m){const a=+m[1].replace(/,/g,"");return a.toLocaleString("ko-KR")+"달러는 약 "+Math.round(a*rate).toLocaleString("ko-KR")+"원입니다. 환율 "+rate.toFixed(2)+"원, 참고용입니다."}
+ return"현재 1달러는 약 "+rate.toFixed(2)+"원입니다. 참고용 환율입니다."}catch(e){return e.message==="Failed to fetch"?"환율 서버에 연결하지 못했습니다.":e.message}}
+const hm=d=>{const h=d.getHours(),m=d.getMinutes();return(h<12?"오전 ":"오후 ")+(h%12||12)+"시"+(m?" "+m+"분":"")};
+async function brief(){const d=new Date(),a=[];
+ a.push("오늘은 "+d.toLocaleDateString("ko-KR",{month:"long",day:"numeric",weekday:"long"})+", 지금은 "+hm(d)+"입니다.");
+ a.push(await weather("",0));
+ const td=LJ("f_todos");a.push(td.length?"할 일 "+td.length+"개: "+td.slice(0,3).map((x,i)=>(i+1)+"번 "+x).join(", ")+(td.length>3?" 외":"")+".":"등록된 할 일은 없습니다.");
+ const now=Date.now();timers=timers.filter(x=>x.end>now);if(timers.length)a.push("실행 중인 타이머 "+timers.length+"개.");
+ const w=LJ("f_wl");if(w.length&&L.f_av)a.push(await quote(w.slice(0,5)));
+ return a.join(" ")}
+function addLink(label,url){const e=add("f","");const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";a.textContent=label;e.append(a)}
+function setT(sec,label,msg){const id=setTimeout(()=>{timers=timers.filter(x=>x.id!==id);beep();add("f",msg);say(msg)},sec*1000);timers.push({id,end:Date.now()+sec*1000,label})}
+async function enrich(q){if(!/(분석|전망|어때|어떻게\s*보|살까|팔까|사도|매수|매도)/.test(q))return q;let y=null;for(const k in AL)if(q.includes(k)){y=AL[k];break}
+ if(!y){const m=q.match(/\b[A-Z]{2,5}\b/);if(m&&/(주식|종목|주가|ETF)/.test(q))y=m[0]}
+ if(!y||!L.f_av)return q;const d=await quote([y]);
+ return q+"\n[앱이 방금 조회한 시세: "+d+"]\n실시간 정보는 위 시세뿐임을 전제로, 일반적으로 알려진 사업 특성과 위 시세만 근거로 3문장 이내로 냉정하게 답한다. 사실과 추정을 구분하고 매수·매도를 권유하지 않는다."}
 function local(t){t=t.trim().replace(/[.!?]+$/,"");
  if(pend){const k=pend;pend=null;if(/^(확인|응|네|예|그래|삭제)/.test(t)){if(k==="n")LS("f_notes",[]);else LS("f_todos",[]);return k==="n"?"메모를 모두 삭제했습니다.":"할 일을 모두 삭제했습니다."}return"취소했습니다."}
  if(/도움말|(뭘|뭐|무엇).*(할\s*수|도와)|할\s*수\s*있는\s*(일|기능|거)|기능\s*(알려|설명)/.test(t))return HELP;
  if(/타이머.*(취소|끄|꺼|중지|멈춰)/.test(t)){const n=timers.length;timers.forEach(x=>clearTimeout(x.id));timers=[];return n?"타이머를 모두 취소했습니다.":"실행 중인 타이머가 없습니다."}
  if(/타이머.*(남았|확인|몇|뭐)/.test(t)){const now=Date.now();timers=timers.filter(x=>x.end>now);return timers.length?timers.map(x=>x.label+" 타이머 "+fmt(Math.ceil((x.end-now)/1000))+" 남았습니다.").join(" "):"실행 중인 타이머가 없습니다."}
+  if(/(브리핑|상황\s*보고|굿\s*모닝|좋은\s*아침)/.test(t))return brief();
+ let cm=t.match(/^도시\s*(?:설정|등록|변경)\s*(.+)$/);if(cm){L.f_city=cm[1].trim();return"기본 도시를 "+L.f_city+"(으)로 설정했습니다."}
+ if(/(날씨|기온|우산)/.test(t)&&!/^(메모|할\s*일)/.test(t)){const m3=t.match(/([가-힣]{2,8})\s*(?:의\s*)?(?:날씨|기온)/),cty=m3&&!/^(오늘|내일|지금|현재|이번|요즘|오늘의|내일의)$/.test(m3[1])?m3[1]:"";return weather(cty,/내일/.test(t)?1:0)}
+ if(/환율|(\d[\d,.]*)\s*달러.*(원|얼마)/.test(t)&&!/(주가|시세)/.test(t))return fxSay(t);
+ const ab=!/뒤|(?<!오)후/.test(t)&&!/메모|할\s*일/.test(t)&&/(알려|알림|알람|깨워)/.test(t)&&t.match(/(오전|오후|아침|저녁|밤|새벽)?\s*(\d{1,2})\s*시(?!간)\s*(?:(\d{1,2})\s*분|(반))?/);
+ if(ab){const h=+ab[2],mi=ab[4]?30:(+ab[3]||0);if(h>24||mi>59)return"시각을 알아듣지 못했습니다.";
+  const pm=/오후|저녁|밤/.test(ab[1]||""),am=/오전|아침|새벽/.test(ab[1]||""),cand=pm?[h<12?h+12:h]:am?[h===12?0:h]:(h<12?[h,h+12]:[h]),now=new Date();let best=Infinity;
+  cand.forEach(H2=>{const g=new Date(now);g.setHours(H2%24,mi,0,0);let df=(g-now)/1000;if(df<=0)df+=86400;if(df<best)best=df});
+  const sec=Math.round(best),tg=new Date(now.getTime()+sec*1000),lb=hm(tg)+" 알림";
+  setT(sec,lb,lb.replace(" 알림","")+"입니다. 설정하신 알림 시각입니다.");return hm(tg)+"에 알려드리겠습니다. "+fmt(sec)+" 후입니다. 이 탭을 열어 두세요."}
+ if(/(계산|얼마|곱하기|나누기|더하기|빼기)/.test(t)&&!/(주가|시세|달러|환율)/.test(t)){const e=t.replace(/곱하기|×|\*/g,"*").replace(/나누기|÷/g,"/").replace(/더하기/g,"+").replace(/빼기/g,"-").replace(/(\d)\s*x\s*(\d)/gi,"$1*$2").replace(/(\d),(?=\d{3})/g,"$1"),mm=e.match(/[\d(][\d.\s+\-*/()]*[\d)]/);
+  if(mm&&/[+\-*/]/.test(mm[0])){try{const v=Function('"use strict";return('+mm[0]+")")();if(typeof v==="number"&&isFinite(v))return mm[0].replace(/\s+/g,"")+" = "+v.toLocaleString("ko-KR",{maximumFractionDigits:6})}catch(_){}}}
+ let lk;
+ if(/(채용|공고|구인)/.test(t)&&/(검색|찾아|알려|열어|보여)/.test(t)){const q2=t.replace(/(채용|공고|구인|검색|찾아|알려|열어|보여|해\s*줘|줘|해|정보)/g," ").replace(/\s+/g," ").trim();if(!q2)return"어떤 직무나 지역을 검색할까요? 예: 부산 항만 채용 검색";
+  addLink("사람인에서 "+q2+" 채용 보기","https://www.saramin.co.kr/zf_user/search?searchword="+encodeURIComponent(q2));addLink("잡코리아에서 "+q2+" 채용 보기","https://www.jobkorea.co.kr/Search/?stext="+encodeURIComponent(q2));return q2+" 채용 검색 링크를 화면에 표시했습니다. 눌러서 여세요."}
+ if(/(유튜브|틀어|재생)/.test(t)&&(lk=t.replace(/(유튜브에서|유튜브|틀어|재생|검색|찾아|해\s*줘|줘|해|음악|노래)/g," ").replace(/\s+/g," ").trim())){addLink("유튜브에서 "+lk+" 검색","https://www.youtube.com/results?search_query="+encodeURIComponent(lk));return lk+" 유튜브 검색 링크를 화면에 표시했습니다. 눌러서 여세요."}
+ if(/지도|길\s*찾기/.test(t)&&/(보여|열어|검색|찾아|알려)/.test(t)&&(lk=t.replace(/(지도|길\s*찾기|보여|열어|검색|찾아|알려|해\s*줘|줘|해|에서|를|을)/g," ").replace(/\s+/g," ").trim())){addLink("지도에서 "+lk+" 보기","https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(lk));return lk+" 지도 링크를 화면에 표시했습니다. 눌러서 여세요."}
+ if(/^(구글(?:에서)?\s*)?.+\s*검색(해\s*줘|해줘|해)?$/.test(t)&&/(구글|검색)/.test(t)&&(lk=t.replace(/(구글에서|구글|검색|해\s*줘|줘|해)/g," ").replace(/\s+/g," ").trim())){addLink("구글에서 "+lk+" 검색","https://www.google.com/search?q="+encodeURIComponent(lk));return lk+" 구글 검색 링크를 화면에 표시했습니다. 눌러서 여세요."}
  const tm=[...t.matchAll(/(\d+)\s*(시간|분|초)/g)];
  if(tm.length&&/타이머|알려|알림|뒤에|후에/.test(t)&&!/메모|할\s*일/.test(t)){let sec=0;tm.forEach(m=>sec+=+m[1]*({"시간":3600,"분":60,"초":1}[m[2]]));
   if(sec<1||sec>86400)return"타이머는 1초 이상 24시간 이하로 설정할 수 있습니다.";
@@ -87,7 +142,7 @@ function local(t){t=t.trim().replace(/[.!?]+$/,"");
  return null}
 async function ask(q){q=q.trim();if(busy||!q)return;const lr=await local(q);if(lr!==null){add('u',q);add('f',lr);await say(lr);return}const key=L.f_k;
  if(!key){add("e","설정에서 API 키를 먼저 입력하세요.");$("cfg").click();return}
- busy=true;add("u",q);H.push({role:"user",parts:[{text:q}]});const w=add("f","…");
+ busy=true;add("u",q);H.push({role:"user",parts:[{text:await enrich(q)}]});const w=add("f","…");
  try{const base=L.f_m||"gemini-3.8-flash",chain=[base,...["gemini-3.7-flash","gemini-3.5-flash-lite","gemini-3.1-flash-lite"].filter(x=>x!==base)];
    const body=JSON.stringify({systemInstruction:{parts:[{text:SYS+" 현재 시각: "+nowStr()+". 할 일·메모·타이머는 앱이 직접 처리하므로 대신 처리하는 척하지 않는다."}]},contents:H});let r,j;
    for(let i=0;i<chain.length;i++){const more=i<chain.length-1;
