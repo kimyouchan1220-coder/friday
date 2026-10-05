@@ -14,6 +14,7 @@ dialog label{display:block;margin:8px 0 2px;font-size:13px;color:#9fb0cf}dialog 
 </style></head><body>
 <header><b>FRIDAY</b><span><button id="wk">👂</button> <button id="sp"></button> <button id="cfg">설정</button></span></header>
 <div id="log"></div>
+<div id="hr" style="padding:3px 14px;font-size:12px;color:#7f8fb0;min-height:18px"></div>
 <footer><button id="mic">🎤</button><input id="t" placeholder="프라이데이에게 말하기"><button id="go">전송</button></footer>
 <dialog id="d"><h3>설정</h3>
 <label>Gemini API 키 (이 기기 브라우저에만 저장)</label><input id="k" type="password">
@@ -101,9 +102,9 @@ async function ask(q){q=q.trim();if(busy||!q)return;const lr=await local(q);if(l
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 $("mic").onclick=()=>{if(!SR)return add("e","이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용하세요.");
  if(rec){rec.stop();return}
- speechSynthesis.cancel();rec=new SR();rec.lang="ko-KR";rec.interimResults=false;
+ speechSynthesis.cancel();rec=new SR();rec.lang="ko-KR";rec.interimResults=false;rec.maxAlternatives=3;
  rec.onstart=()=>$("mic").classList.add("on");
- rec.onresult=e=>ask(e.results[0][0].transcript);
+ rec.onresult=e=>{const x=e.results[0][0].transcript;$("hr").textContent="들은 말: "+x;ask(x)};
  rec.onerror=e=>add("e","음성 인식 오류: "+e.error);
  rec.onend=()=>{rec=null;$("mic").classList.remove("on")};rec.start()};
 $("go").onclick=()=>{const q=$("t").value;$("t").value="";ask(q)};
@@ -120,18 +121,18 @@ $("ml").onclick=async()=>{const k=$("k").value.trim()||L.f_k;if(!k)return alert(
 $("ok").onclick=()=>{L.f_k=$("k").value.trim();L.f_m=$("m").value;L.f_v=$("v").value;L.f_av=$("av").value.trim();L.f_r=$("r").value;$("d").close()};
 $("x").onclick=()=>{H=[];save();$("log").innerHTML=""};
 let wake=false,act=false,ar,tm,lock,fails=0,rd=300;
-const WR=/프라이\s?데이|프라이\s?대이|friday/i,arm=()=>{clearTimeout(tm);tm=setTimeout(()=>{act=false},20000)};
+const WR=/(프라이|푸라이|플라이|프리이)\s?(데이|대이|다이|떼이|데|대)|friday|fry\s?day/i,arm=()=>{clearTimeout(tm);tm=setTimeout(()=>{act=false},20000)};
 const ui=()=>{$("wk").style.background=wake?"#0a7":"";$("wk").textContent=wake?"👂 대기중":"👂"};
 function pauseL(){if(ar){ar.onend=null;ar.abort();ar=null}}
 function listen(){if(!wake||ar||speechSynthesis.speaking)return;
  ar=new SR();ar.lang="ko-KR";ar.continuous=true;ar.interimResults=false;
- ar.onresult=e=>heard(e.results[e.resultIndex][0].transcript.trim());
+ ar.maxAlternatives=5;ar.onresult=e=>{const r=e.results[e.resultIndex],a=[];for(let i=0;i<r.length;i++)a.push(r[i].transcript.trim());$("hr").textContent="들은 말: "+a[0];heard(a)};
  ar.onerror=e=>{if(e.error==="network")rd=3000;if(/not-allowed|service-not-allowed/.test(e.error)){wake=false;fails++;ui();add("e","마이크 권한이 필요합니다. 주소창 왼쪽 아이콘에서 마이크를 허용한 뒤 화면을 한 번 터치하세요.")}};
  ar.onend=()=>{ar=null;setTimeout(listen,rd);rd=300};
  try{ar.start()}catch(_){}}
 async function say2(t){add("f",t);await say(t)}
-async function heard(t){if(busy)return;
- if(!act){const m=t.match(WR);if(!m)return;act=true;
+async function heard(al){if(busy)return;let t=al[0];
+ if(!act){const f=al.find(x=>WR.test(x));if(!f)return;t=f;const m=t.match(WR);act=true;
   const rest=t.slice(m.index+m[0].length).replace(/^[\s,.!?]*(야(?=[\s,.!?]|$))?[\s,.!?]*/,"");
   if(rest)return cmd(rest);await say2("네, 프라이데이입니다.");arm();return}
  cmd(t)}
