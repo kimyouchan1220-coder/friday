@@ -25,6 +25,7 @@ dialog label{display:block;margin:8px 0 2px;font-size:13px;color:#9fb0cf}dialog 
 <p style="margin:6px 0"><button id="cal" type="button">감지 보정 시작</button> <span id="cr" style="font-size:12px;color:#9fb0cf"></span></p>
 <label>Alpha Vantage 키 (주가 조회용, 이 기기 브라우저에만 저장)</label><input id="av" type="password">
 <label>말하기 속도</label><input id="r" type="range" min=".7" max="1.5" step=".1" value="1.05">
+<p style="margin:6px 0"><button id="bk" type="button">데이터 내보내기</button> <button id="rs" type="button">데이터 가져오기</button> <input type="file" id="rf" accept=".json" hidden> <span id="bs" style="font-size:12px;color:#9fb0cf"></span></p>
 <p style="text-align:right"><button id="x" type="button">기록 삭제</button> <button id="ok">저장</button></p></dialog>
 <script>
 const $=i=>document.getElementById(i),L=localStorage,API="https://generativelanguage.googleapis.com/v1beta/models";
@@ -54,7 +55,7 @@ let timers=[],pend=null;
 const fmt=n=>{const h=Math.floor(n/3600),m=Math.floor(n%3600/60),x=n%60;return[h?h+"시간":"",m?m+"분":"",x?x+"초":""].filter(Boolean).join(" ")||"0초"};
 const nowStr=()=>new Date().toLocaleString("ko-KR",{dateStyle:"full",timeStyle:"short"});
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},600)}catch(_){}}
-const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색). 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
+const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색) 13) 지원 관리 (예: 지원 추가 부산항만공사 마감 10월 20일, 지원 현황, 지원 1번 면접, 마감 임박) 14) 지출 기록 (예: 점심 8천원 썼어, 이번 달 지출, 지출 취소). 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
 const LIST=(a,e)=>a.length?a.map((x,i)=>(i+1)+"번 "+x).join(". "):e;
 const CITY={"서울":[37.5665,126.978],"부산":[35.1796,129.0756],"인천":[37.4563,126.7052],"대구":[35.8714,128.6014],"대전":[36.3504,127.3845],"광주":[35.1595,126.8526],"울산":[35.5384,129.3114],"세종":[36.48,127.289],"수원":[37.2636,127.0286],"창원":[35.228,128.6811],"제주":[33.4996,126.5312],"포항":[36.019,129.3435],"김해":[35.2285,128.8894],"성남":[37.42,127.1267],"고양":[37.6584,126.832],"용인":[37.2411,127.1776],"청주":[36.6424,127.489],"전주":[35.8242,127.148],"천안":[36.8151,127.1139],"여수":[34.7604,127.6622],"춘천":[37.8813,127.7298],"강릉":[37.7519,128.8761]};
 const WX={0:"맑음",1:"대체로 맑음",2:"구름 조금",3:"흐림",45:"안개",48:"안개",51:"약한 이슬비",53:"이슬비",55:"강한 이슬비",56:"어는 이슬비",57:"어는 이슬비",61:"약한 비",63:"비",65:"강한 비",66:"어는 비",67:"어는 비",71:"약한 눈",73:"눈",75:"강한 눈",77:"싸락눈",80:"약한 소나기",81:"소나기",82:"강한 소나기",85:"눈 소나기",86:"강한 눈 소나기",95:"뇌우",96:"우박 동반 뇌우",99:"강한 우박 동반 뇌우"};
@@ -84,6 +85,8 @@ async function brief(){const d=new Date(),a=[];
  a.push("오늘은 "+d.toLocaleDateString("ko-KR",{month:"long",day:"numeric",weekday:"long"})+", 지금은 "+hm(d)+"입니다.");
  a.push(await weather("",0));
  const td=LJ("f_todos");a.push(td.length?"할 일 "+td.length+"개: "+td.slice(0,3).map((x,i)=>(i+1)+"번 "+x).join(", ")+(td.length>3?" 외":"")+".":"등록된 할 일은 없습니다.");
+ const sj=soon();if(sj.length)a.push("7일 이내 지원 마감: "+sj.map(j=>j.c+dTxt(j)).join(", ")+".");
+ const ms=monthSum();if(ms)a.push("이번 달 지출은 "+won(ms)+"입니다.");
  const now=Date.now();timers=timers.filter(x=>x.end>now);if(timers.length)a.push("실행 중인 타이머 "+timers.length+"개.");
  const w=LJ("f_wl");if(w.length&&L.f_av)a.push(await quote(w.slice(0,5)));
  return a.join(" ")}
@@ -93,12 +96,51 @@ async function enrich(q){if(!/(분석|전망|어때|어떻게\s*보|살까|팔�
  if(!y){const m=q.match(/\b[A-Z]{2,5}\b/);if(m&&/(주식|종목|주가|ETF)/.test(q))y=m[0]}
  if(!y||!L.f_av)return q;const d=await quote([y]);
  return q+"\n[앱이 방금 조회한 시세: "+d+"]\n실시간 정보는 위 시세뿐임을 전제로, 일반적으로 알려진 사업 특성과 위 시세만 근거로 3문장 이내로 냉정하게 답한다. 사실과 추정을 구분하고 매수·매도를 권유하지 않는다."}
+const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const today0=()=>{const n=new Date();n.setHours(0,0,0,0);return n};
+const dd=x=>Math.round((new Date(x+"T00:00:00")-today0())/864e5);
+function pDate(s){s=s||"";const n=today0();let m;
+ if(/오늘/.test(s))return n;if(/모레/.test(s)){n.setDate(n.getDate()+2);return n}if(/내일/.test(s)){n.setDate(n.getDate()+1);return n}
+ if(m=s.match(/(\d+)\s*일\s*(?:뒤|후)/)){n.setDate(n.getDate()+ +m[1]);return n}
+ m=s.match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일?/)||s.match(/(\d{1,2})\s*[\/.]\s*(\d{1,2})/);if(!m)return null;
+ let d=new Date(n.getFullYear(),+m[1]-1,+m[2]);if(d.getMonth()!==+m[1]-1)return null;if(d<n)d=new Date(n.getFullYear()+1,+m[1]-1,+m[2]);return d}
+const JST=["준비","지원완료","서류통과","면접","합격","불합격"];
+const jobSave=a=>{a.sort((x,y)=>(x.d||"9999")<(y.d||"9999")?-1:(x.d||"9999")>(y.d||"9999")?1:0);LS("f_jobs",a)};
+const dTxt=j=>{if(!j.d)return"";const k=dd(j.d);return" 마감 "+(+j.d.slice(5,7))+"월 "+(+j.d.slice(8))+"일 "+(k<0?"지남":k===0?"오늘":k+"일 남음")};
+const jobLine=(j,i)=>(i+1)+"번 "+j.c+" "+j.s+dTxt(j);
+const soon=()=>LJ("f_jobs").filter(j=>j.d&&j.s==="준비"&&dd(j.d)>=0&&dd(j.d)<=7);
+function jobCmd(t){let m=t.match(/^지원\s*(?:추가|등록)\s*(.+)$/);
+ if(m){const dm=m[1].match(/^(.*?)\s*마감\s*(.+)$/),name=(dm?dm[1]:m[1]).trim();if(!name)return"회사명을 말씀해 주세요.";
+  const dt=dm?pDate(dm[2]):null;if(dm&&!dt)return"마감일을 알아듣지 못했습니다. 예: 마감 10월 20일";
+  const a=LJ("f_jobs");a.push({c:name,d:dt?ymd(dt):"",s:"준비"});jobSave(a);return name+" 지원 목록에 추가했습니다."+(dt?" 마감 "+(dt.getMonth()+1)+"월 "+dt.getDate()+"일, "+Math.round((dt-today0())/864e5)+"일 남았습니다.":"")}
+ if(/^지원\s*(현황|목록|리스트|상태)/.test(t)){const a=LJ("f_jobs");return a.length?a.map(jobLine).join(". "):"등록된 지원이 없습니다. 지원 추가 회사명 마감 10월 20일처럼 말씀해 주세요."}
+ if(/^마감\s*임박/.test(t)){const a=soon();return a.length?"7일 이내 마감: "+a.map(j=>j.c+dTxt(j)).join(". "):"7일 이내에 마감인 준비 중 지원이 없습니다."}
+ m=t.match(/^지원\s*(\d+)\s*번?\s*(?:상태\s*)?(준비|지원완료|지원|서류통과|면접|합격|불합격)/);
+ if(m){const a=LJ("f_jobs"),i=+m[1]-1;if(i<0||i>=a.length)return"그 번호의 지원이 없습니다.";a[i].s=m[2]==="지원"?"지원완료":m[2];const c=a[i].c;jobSave(a);return c+" 상태를 "+a.find(x=>x.c===c).s+"(으)로 바꿨습니다."}
+ m=t.match(/^지원\s*(\d+)\s*번?\s*(삭제|취소)/);
+ if(m){const a=LJ("f_jobs"),i=+m[1]-1;if(i<0||i>=a.length)return"그 번호의 지원이 없습니다.";const r=a.splice(i,1)[0];jobSave(a);return r.c+" 삭제했습니다."}
+ return null}
+function pWon(s){let tot=0,m,any=false;const re=/(\d[\d,]*(?:\.\d+)?)\s*(억|만|천|백)?/g;while(m=re.exec(s)){any=true;tot+=parseFloat(m[1].replace(/,/g,""))*({"억":1e8,"만":1e4,"천":1e3,"백":100}[m[2]]||1)}return any?Math.round(tot):null}
+const won=n=>n.toLocaleString("ko-KR")+"원";
+const monthSum=()=>{const k=ymd(new Date()).slice(0,7);return LJ("f_exp").filter(e=>e.d.slice(0,7)===k).reduce((a,e)=>a+e.a,0)};
+function expCmd(t){const am=t.match(/((?:\d[\d,]*(?:\.\d+)?\s*(?:억|만|천|백)?\s*)+)원/);
+ if(/^(마지막\s*지출|지출)\s*(취소|삭제)/.test(t)){const a=LJ("f_exp");if(!a.length)return"기록된 지출이 없습니다.";const r=a.pop();LS("f_exp",a);return r.c+" "+won(r.a)+" 기록을 삭제했습니다."}
+ if(am&&/(썼|지출|결제|샀|냈|사용)/.test(t)&&!/(얼마|합계|내역|현황)/.test(t)){const amt=pWon(am[1]);if(!amt||amt<=0)return"금액을 알아듣지 못했습니다.";
+  let c=t.replace(am[0]," ").replace(/(오늘|어제|지출|썼어요|썼어|썼다|결제했어|결제|샀어|냈어|사용했어|사용|했어)/g," ").replace(/\s+/g," ").trim().replace(/(에서|에|으로|로)$/,"")||"기타";
+  const d=new Date();if(/어제/.test(t))d.setDate(d.getDate()-1);const a=LJ("f_exp");a.push({d:ymd(d),a:amt,c});LS("f_exp",a);return c+" "+won(amt)+" 기록했습니다. 이번 달 누적 "+won(monthSum())+"입니다."}
+ if(!am&&t.length<=20&&/(지출|얼마\s*썼|썼.*얼마)/.test(t)){const a=LJ("f_exp"),now=ymd(new Date());let lab="이번 달",f=e=>e.d.slice(0,7)===now.slice(0,7);
+  if(/오늘/.test(t)){lab="오늘";f=e=>e.d===now}else if(/어제/.test(t)){const y=new Date();y.setDate(y.getDate()-1);const yy=ymd(y);lab="어제";f=e=>e.d===yy}
+  const r=a.filter(f);if(!r.length)return lab+" 기록된 지출이 없습니다.";const g={};r.forEach(e=>g[e.c]=(g[e.c]||0)+e.a);
+  const top=Object.entries(g).sort((x,y)=>y[1]-x[1]).slice(0,3).map(x=>x[0]+" "+won(x[1])).join(", ");return lab+" 지출은 "+won(r.reduce((x,e)=>x+e.a,0))+", "+r.length+"건입니다. 많은 순으로 "+top+"."}
+ return null}
 function local(t){t=t.trim().replace(/[.!?]+$/,"");
  if(pend){const k=pend;pend=null;if(/^(확인|응|네|예|그래|삭제)/.test(t)){if(k==="n")LS("f_notes",[]);else LS("f_todos",[]);return k==="n"?"메모를 모두 삭제했습니다.":"할 일을 모두 삭제했습니다."}return"취소했습니다."}
  if(/도움말|(뭘|뭐|무엇).*(할\s*수|도와)|할\s*수\s*있는\s*(일|기능|거)|기능\s*(알려|설명)/.test(t))return HELP;
  if(/타이머.*(취소|끄|꺼|중지|멈춰)/.test(t)){const n=timers.length;timers.forEach(x=>clearTimeout(x.id));timers=[];return n?"타이머를 모두 취소했습니다.":"실행 중인 타이머가 없습니다."}
  if(/타이머.*(남았|확인|몇|뭐)/.test(t)){const now=Date.now();timers=timers.filter(x=>x.end>now);return timers.length?timers.map(x=>x.label+" 타이머 "+fmt(Math.ceil((x.end-now)/1000))+" 남았습니다.").join(" "):"실행 중인 타이머가 없습니다."}
   if(/(브리핑|상황\s*보고|굿\s*모닝|좋은\s*아침)/.test(t))return brief();
+ if(/^지원\s/.test(t)||/^마감\s*임박/.test(t)){const jr=jobCmd(t);if(jr!==null)return jr}
+ if(!/^(메모|할\s*일|지원)/.test(t)){const er=expCmd(t);if(er!==null)return er}
  let cm=t.match(/^도시\s*(?:설정|등록|변경)\s*(.+)$/);if(cm){L.f_city=cm[1].trim();return"기본 도시를 "+L.f_city+"(으)로 설정했습니다."}
  if(/(날씨|기온|우산)/.test(t)&&!/^(메모|할\s*일)/.test(t)){const m3=t.match(/([가-힣]{2,8})\s*(?:의\s*)?(?:날씨|기온)/),cty=m3&&!/^(오늘|내일|지금|현재|이번|요즘|오늘의|내일의)$/.test(m3[1])?m3[1]:"";return weather(cty,/내일/.test(t)?1:0)}
  if(/환율|(\d[\d,.]*)\s*달러.*(원|얼마)/.test(t)&&!/(주가|시세)/.test(t))return fxSay(t);
@@ -178,6 +220,12 @@ $("ml").onclick=async()=>{const k=$("k").value.trim()||L.f_k;if(!k)return alert(
  }catch(e){alert("조회 실패: "+e.message)}};
 $("ok").onclick=()=>{L.f_k=$("k").value.trim();L.f_m=$("m").value;L.f_v=$("v").value;L.f_av=$("av").value.trim();L.f_cs=$("cs").value;L.f_r=$("r").value;$("d").close()};
 $("x").onclick=()=>{H=[];save();$("log").innerHTML=""};
+const DK=["f_notes","f_todos","f_wl","f_city","f_jobs","f_exp"];
+$("bk").onclick=()=>{try{const o={app:"friday",v:1,t:new Date().toISOString(),data:{}};DK.forEach(k=>{if(L[k]!==undefined)o.data[k]=L[k]});
+ const b=new Blob([JSON.stringify(o)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="friday-backup-"+ymd(new Date())+".json";document.body.append(a);a.click();a.remove();$("bs").textContent="내보냈습니다. API 키는 포함되지 않습니다."}catch(e){$("bs").textContent="내보내기에 실패했습니다."}};
+$("rs").onclick=()=>$("rf").click();
+$("rf").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;try{const o=JSON.parse(await f.text());if(o.app!=="friday"||!o.data)throw 0;let n=0;
+ for(const k of DK){if(o.data[k]===undefined)continue;if(k!=="f_city"){JSON.parse(o.data[k])}L[k]=o.data[k];n++}$("bs").textContent=n+"개 항목을 가져왔습니다. 기존 같은 항목은 덮어썼습니다."}catch(_){$("bs").textContent="올바른 백업 파일이 아닙니다."}};
 let wake=false,act=false,ar,tm,lock,fails=0,rd=300;
 const WR=/(프라이|푸라이|플라이|프리이)\s?(데이|대이|다이|떼이|데|대)|friday|fry\s?day/i,arm=()=>{clearTimeout(tm);tm=setTimeout(()=>{act=false},20000)};
 const ui=()=>{$("wk").style.background=wake?"#0a7":"";$("wk").textContent=wake?"👂 대기중":"👂"};
