@@ -149,14 +149,14 @@ nav button{white-space:nowrap}
 <dialog id="d"><h3>설정</h3>
 <label>Gemini API 키 (이 기기 브라우저에만 저장)</label><input id="k" type="password">
 <label>모델 <button id="ml" type="button">목록 조회</button></label><select id="m"></select>
-<label>음성 (여성 음성 선택)</label><select id="v"></select>
 <label>Alpha Vantage 키 (주가 조회용, 이 기기 브라우저에만 저장)</label><input id="av" type="password">
-<label>음성 엔진</label><select id="ve"><option value="browser">기본 (브라우저, 무료)</option><option value="gemini">Gemini 고품질 (같은 API 키, 무료 한도)</option><option value="azure">Azure (별도 키, 월 50만 자 무료)</option></select>
-<label>Gemini 목소리</label><select id="gv"></select>
-<label>Azure 키 / 지역 / 목소리 (이 기기 브라우저에만 저장)</label><input id="azk" type="password" placeholder="Azure Speech 키"><input id="azr" placeholder="지역 (예: koreacentral)"><select id="azv"></select>
-<label>말투 (문구는 항상 바뀜, 억양은 고품질 음성에서만 바뀜)</label><select id="pe"></select>
+<label>음성 엔진 (소리를 만드는 방식)</label><select id="ve"><option value="browser">기본 (이 기기 내장, 무료)</option><option value="gemini">Gemini 고품질 (같은 API 키, 무료 한도)</option><option value="azure">Azure (별도 키, 월 50만 자 무료)</option></select>
+<div id="gB"><label>목소리 (이 기기에 설치된 한국어 음성)</label><select id="v"></select>
+<label>말하기 속도</label><input id="r" type="range" min=".7" max="1.5" step=".1" value="1.05"></div>
+<div id="gG" hidden><label>목소리 (Gemini)</label><select id="gv"></select></div>
+<div id="gA" hidden><label>Azure 키 / 지역 / 목소리 (이 기기 브라우저에만 저장)</label><input id="azk" type="password" placeholder="Azure Speech 키"><input id="azr" placeholder="지역 (예: koreacentral)"><select id="azv"></select></div>
+<label>말투 (문구는 항상 바뀜, 억양은 Gemini 음성에서만 바뀜)</label><select id="pe"></select>
 <p style="margin:8px 0 0"><button id="vt" type="button">미리듣기</button></p>
-<label>말하기 속도</label><input id="r" type="range" min=".7" max="1.5" step=".1" value="1.05">
 <p style="text-align:right"><button id="x" type="button">기록 삭제</button> <button id="ok">저장</button></p></dialog>
 <script>
 const $=i=>document.getElementById(i),L=localStorage,API="https://generativelanguage.googleapis.com/v1beta/models";
@@ -883,7 +883,9 @@ const icon=()=>$("sp").textContent=speak?"음성 켜짐":"음성 꺼짐";icon();
 $("sp").onclick=()=>{speak=!speak;L.f_s=speak?"1":"0";icon();if(!speak)cancelSpeech()};
 function fillVS(){$("ve").value=L.f_ve||"browser";$("gv").innerHTML=Object.keys(GV).map(k=>`<option value="${k}">${k} · ${GV[k]}</option>`).join("");$("gv").value=L.f_gv||"Kore";
  $("azv").innerHTML=Object.keys(AZV).map(k=>`<option value="${k}">${k.replace("ko-KR-","").replace("Neural","")} · ${AZV[k]}</option>`).join("");$("azv").value=L.f_azv||"ko-KR-SunHiNeural";$("azk").value=L.f_azk||"";$("azr").value=L.f_azr||"koreacentral";
- $("pe").innerHTML=Object.keys(PERS).map(k=>`<option value="${k}">${PERS[k].n}</option>`).join("");$("pe").value=L.f_pe||"default"}
+ $("pe").innerHTML=Object.keys(PERS).map(k=>`<option value="${k}">${PERS[k].n}</option>`).join("");$("pe").value=L.f_pe||"default";showVS()}
+function showVS(){const e=$("ve").value;$("gB").hidden=e!=="browser";$("gG").hidden=e!=="gemini";$("gA").hidden=e!=="azure"}
+$("ve").onchange=showVS;
 function saveVS(){L.f_ve=$("ve").value;L.f_gv=$("gv").value;L.f_azv=$("azv").value;L.f_azk=$("azk").value.trim();L.f_azr=$("azr").value.trim();L.f_pe=$("pe").value;TC.clear()}
 $("vt").onclick=()=>{saveVS();say(persona().pv)};
 $("cfg").onclick=()=>{fillVS();$("k").value=L.f_k||"";$("r").value=L.f_r||"1.05";$("av").value=L.f_av||"";$("m").innerHTML=`<option>${L.f_m||"gemini-3.8-flash"}</option>`;loadV();$("d").showModal()};
