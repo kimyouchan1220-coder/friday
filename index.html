@@ -154,7 +154,7 @@ nav button{white-space:nowrap}
 <label>음성 엔진</label><select id="ve"><option value="browser">기본 (브라우저, 무료)</option><option value="gemini">Gemini 고품질 (같은 API 키, 무료 한도)</option><option value="azure">Azure (별도 키, 월 50만 자 무료)</option></select>
 <label>Gemini 목소리</label><select id="gv"></select>
 <label>Azure 키 / 지역 / 목소리 (이 기기 브라우저에만 저장)</label><input id="azk" type="password" placeholder="Azure Speech 키"><input id="azr" placeholder="지역 (예: koreacentral)"><select id="azv"></select>
-<label>말투</label><select id="pe"></select>
+<label>말투 (문구는 항상 바뀜, 억양은 고품질 음성에서만 바뀜)</label><select id="pe"></select>
 <p style="margin:8px 0 0"><button id="vt" type="button">미리듣기</button></p>
 <label>말하기 속도</label><input id="r" type="range" min=".7" max="1.5" step=".1" value="1.05">
 <p style="text-align:right"><button id="x" type="button">기록 삭제</button> <button id="ok">저장</button></p></dialog>
@@ -671,9 +671,9 @@ function ext(t){
 let ACX=null,AXS=null,RPL=0,TGEN=0,vwarn=0,GREET=null;const TC=new Map();
 const GV={"Kore":"단단함","Aoede":"경쾌함","Leda":"젊음","Zephyr":"밝음","Sulafat":"따뜻함","Puck":"활기참","Charon":"차분한 설명조","Fenrir":"들뜬 느낌","Orus":"단단함","Algenib":"거친 저음"};
 const AZV={"ko-KR-SunHiNeural":"여성","ko-KR-JiMinNeural":"여성","ko-KR-SeoHyeonNeural":"여성","ko-KR-YuJinNeural":"여성","ko-KR-InJoonNeural":"남성","ko-KR-BongJinNeural":"남성","ko-KR-GookMinNeural":"남성"};
-const PERS={default:{n:"기본",sys:"",st:"calm, composed and precise female AI assistant speaking natural Korean at a measured pace",ack:"네, 프라이데이입니다."},
- movie:{n:"영화(보스)",sys:"말투: 영화 속 프라이데이처럼 차분하고 효율적인 여성 AI. 사용자를 '보스'라고 부른다. 존댓말로 보고하듯 간결하게 말한다. 아부하지 않는다.",st:"efficient, calm and slightly dry female AI assistant speaking natural Korean at a measured pace",ack:"네, 보스."},
- butler:{n:"집사 자비스",sys:"말투: 영국 집사 AI 자비스처럼 정중하고 절제된 존댓말. 사용자를 '보스'라고 부른다. 가끔 건조한 위트를 한 문장 섞되 정확성이 우선이다. 아부하지 않는다.",st:"refined, courteous butler-like composure with dry wit, speaking natural Korean at a measured pace",ack:"네, 보스. 말씀하십시오."}};
+const PERS={default:{n:"기본",sys:"",st:"calm, composed and precise female AI assistant speaking natural Korean at a measured pace",ack:"네, 프라이데이입니다.",pv:"프라이데이입니다. 무엇을 도와드릴까요?"},
+ movie:{n:"영화(보스)",sys:"말투: 영화 속 프라이데이처럼 차분하고 효율적인 여성 AI. 사용자를 '보스'라고 부른다. 존댓말로 보고하듯 간결하게 말한다. 아부하지 않는다.",st:"efficient, calm and slightly dry female AI assistant speaking natural Korean at a measured pace",ack:"네, 보스.",pv:"네, 보스. 오늘 일정과 시장 상황은 정리해 두었습니다. 지시만 내리십시오."},
+ butler:{n:"집사 자비스",sys:"말투: 영국 집사 AI 자비스처럼 정중하고 절제된 존댓말. 사용자를 '보스'라고 부른다. 가끔 건조한 위트를 한 문장 섞되 정확성이 우선이다. 아부하지 않는다.",st:"refined, courteous butler-like composure with dry wit, speaking natural Korean at a measured pace",ack:"네, 보스. 말씀하십시오.",pv:"어서 오십시오, 보스. 필요하신 것이 있으면 말씀하십시오. 이미 준비해 두었습니다."}};
 const persona=()=>PERS[L.f_pe]||PERS.default;
 const wakeAck=()=>persona().ack;
 const talking=()=>{let k=false;try{k=speechSynthesis.speaking}catch(_){}return k||RPL>0};
@@ -885,7 +885,7 @@ function fillVS(){$("ve").value=L.f_ve||"browser";$("gv").innerHTML=Object.keys(
  $("azv").innerHTML=Object.keys(AZV).map(k=>`<option value="${k}">${k.replace("ko-KR-","").replace("Neural","")} · ${AZV[k]}</option>`).join("");$("azv").value=L.f_azv||"ko-KR-SunHiNeural";$("azk").value=L.f_azk||"";$("azr").value=L.f_azr||"koreacentral";
  $("pe").innerHTML=Object.keys(PERS).map(k=>`<option value="${k}">${PERS[k].n}</option>`).join("");$("pe").value=L.f_pe||"default"}
 function saveVS(){L.f_ve=$("ve").value;L.f_gv=$("gv").value;L.f_azv=$("azv").value;L.f_azk=$("azk").value.trim();L.f_azr=$("azr").value.trim();L.f_pe=$("pe").value;TC.clear()}
-$("vt").onclick=()=>{saveVS();say("프라이데이입니다. 음성 미리듣기입니다. 지금 목소리가 마음에 드십니까?")};
+$("vt").onclick=()=>{saveVS();say(persona().pv)};
 $("cfg").onclick=()=>{fillVS();$("k").value=L.f_k||"";$("r").value=L.f_r||"1.05";$("av").value=L.f_av||"";$("m").innerHTML=`<option>${L.f_m||"gemini-3.8-flash"}</option>`;loadV();$("d").showModal()};
 $("ml").onclick=async()=>{const k=$("k").value.trim()||L.f_k;if(!k)return alert("키를 먼저 입력하세요.");
  try{const j=await(await fetch(`${API}?pageSize=200`,{headers:{"x-goog-api-key":k}})).json();
