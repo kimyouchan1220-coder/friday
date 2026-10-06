@@ -286,7 +286,7 @@ $("ok").onclick=()=>{L.f_k=$("k").value.trim();L.f_m=$("m").value;L.f_v=$("v").v
 $("x").onclick=()=>{H=[];save();$("log").innerHTML=""};
 let wake=false,act=false,ar,tm,lock,fails=0,rd=300;
 const WR=/(프라이|푸라이|플라이|프리이)\s?(데이|대이|다이|떼이|데|대)|friday|fry\s?day/i,arm=()=>{clearTimeout(tm);tm=setTimeout(()=>{act=false},20000)};
-const ui=()=>{$("wk").style.background=wake?"#0a7":"";$("wk").textContent=wake?"👂 대기중":"👂"};
+const ui=()=>{$("wk").style.background=wake?"#0a7":"";$("wk").textContent=wake?"👂 대기중":"👂 꺼짐"};
 function pauseL(){if(ar){ar.onend=null;ar.abort();ar=null}}
 function listen(){if(!wake||ar||speechSynthesis.speaking)return;
  ar=new SR();ar.lang="ko-KR";ar.continuous=true;ar.interimResults=false;
@@ -304,16 +304,17 @@ async function cmd(t){clearTimeout(tm);
  if(/^(종료|그만|끝|대기)(해|할게|해줘)?[\s.!]*$/.test(t)){act=false;return say2("대기 모드로 전환합니다.")}
  await ask(t);arm()}
 function getLock(){if(navigator.wakeLock&&!lock)navigator.wakeLock.request("screen").then(l=>{lock=l;l.onrelease=()=>{lock=null}}).catch(()=>{})}
-function startWake(manual){if(!SR||wake)return;wake=true;act=false;
+let paused=false;
+function startWake(manual){if(!SR||wake)return;wake=true;paused=false;act=false;
  if(manual){speak=true;L.f_s="1";icon();fails=0}
- L.f_w="1";add("e","상시 대기 중입니다. '프라이데이'라고 불러 보세요. 이 탭을 열고 화면을 켜 둬야 합니다.");
+ add("e","상시 대기 중입니다. '프라이데이'라고 불러 보세요. 이 탭을 열고 화면을 켜 둬야 합니다.");
  getLock();listen();ui()}
-function stopWake(){wake=false;act=false;L.f_w="0";pauseL();speechSynthesis.cancel();if(lock){lock.release();lock=null}ui()}
+function stopWake(){wake=false;paused=true;act=false;pauseL();speechSynthesis.cancel();if(lock){lock.release();lock=null}ui()}
 $("wk").onclick=()=>{if(!SR)return add("e","이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용하세요.");wake?stopWake():startWake(true)};
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&wake){getLock();listen()}});
 if(!SR)add("e","이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용하세요.");
-else if(L.f_w!=="0"){startWake(false);
- const kick=()=>{if(L.f_w!=="0"&&!wake&&fails<3)startWake(false)};
+else{startWake(false);
+ const kick=e=>{if(e&&e.target&&e.target.closest&&e.target.closest("#wk"))return;if(!paused&&!wake&&fails<3)startWake(false)};
  ["pointerdown","keydown","touchstart"].forEach(ev=>document.addEventListener(ev,kick,{passive:true}));
  try{if(!(navigator.userActivation&&navigator.userActivation.hasBeenActive)){$("hr").textContent="화면을 한 번 누르면 음성 응답이 켜집니다. 브라우저 정책상 소리는 한 번 터치해야 나옵니다.";
   const un=()=>{if($("hr").textContent.startsWith("화면을 한 번"))$("hr").textContent="";["pointerdown","keydown","touchstart"].forEach(ev=>document.removeEventListener(ev,un))};
@@ -321,6 +322,6 @@ else if(L.f_w!=="0"){startWake(false);
  try{navigator.permissions.query({name:"microphone"}).then(q=>{
   if(q.state==="denied")add("e","마이크가 차단되어 있습니다. 주소창 왼쪽 자물쇠 아이콘에서 마이크를 허용으로 바꾼 뒤 새로고침하세요.");
   else if(q.state==="prompt")add("e","마이크 허용 창이 뜨면 '허용'을 눌러 주세요. 한 번 허용하면 다음부터는 묻지 않습니다.");
-  q.onchange=()=>{if(q.state==="granted"){fails=0;if(L.f_w!=="0"&&!wake)startWake(false)}}}).catch(()=>{})}catch(_){}}
+  q.onchange=()=>{if(q.state==="granted"){fails=0;if(!paused&&!wake)startWake(false)}}}).catch(()=>{})}catch(_){}}
 H.length?H.forEach(h=>add(h.role==="user"?"u":"f",h.parts[0].text)):add("f","프라이데이 대기 중입니다.");
 </script></body></html>
