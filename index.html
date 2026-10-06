@@ -56,10 +56,44 @@ dialog::backdrop{background:rgba(2,5,10,.72);backdrop-filter:blur(3px)}
 dialog h3{margin:0 0 4px;font:600 15px var(--disp);letter-spacing:.2em;color:var(--line)}
 dialog input[type=range]{accent-color:var(--line);padding:0}
 dialog label{display:block;margin:10px 0 3px;font-size:13px;color:var(--mute)}dialog input,dialog select{width:100%}
+body{flex-direction:row}
+#main{flex:1;min-width:0;display:flex;flex-direction:column;height:100dvh;position:relative;z-index:1}
+#side{width:288px;flex:none;display:flex;flex-direction:column;height:100dvh;overflow-y:auto;border-right:1px solid var(--dim);background:rgba(4,8,15,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);position:relative;z-index:6;transition:margin-left .22s ease,transform .22s ease}
+body.sb-off #side{margin-left:-288px}
+#scrim{display:none}
+.sh{padding:14px 14px 8px}
+#nc{width:100%;color:var(--line);border-color:var(--line);background:rgba(95,243,255,.06);padding:10px 12px;text-align:left}
+#sq{margin:0 14px 6px;width:calc(100% - 28px);background:transparent;border:0;border-bottom:1px solid var(--dim);border-radius:0;padding:8px 2px;font-size:13px}
+#sq:focus{outline:none;border-bottom-color:var(--line)}
+#cvl{flex:1 1 140px;min-height:110px;overflow:auto;padding:4px 8px;scrollbar-width:thin;scrollbar-color:rgba(95,243,255,.3) transparent}
+.ci{display:flex;align-items:center;gap:2px;border-left:1px solid transparent}
+.ci.on{border-left-color:var(--gold);background:linear-gradient(90deg,rgba(255,196,107,.10),transparent)}
+.ct{flex:1;min-width:0;text-align:left;border:0;background:none;padding:8px 8px;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);border-radius:0}
+.cx{display:flex;opacity:0}.ci:hover .cx,.ci:focus-within .cx{opacity:1}
+@media (hover:none){.cx{opacity:.75}}
+.cx button{border:0;background:none;padding:4px 5px;font-size:11px;color:var(--mute)}.cx button:hover{color:var(--line)}
+.none{padding:8px 10px;font-size:12px;color:var(--mute)}
+.sg{padding:10px 16px 4px;font-size:12px;color:var(--mute)}
+#qa{display:flex;flex-direction:column;padding:0 8px 6px}
+#qa button{border:0;background:none;text-align:left;padding:7px 8px;font-size:13px;color:var(--text);border-radius:0}#qa button:hover{background:rgba(95,243,255,.07)}
+.sf{display:flex;gap:6px;padding:10px 14px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--dim)}.sf button{flex:1;font-size:12px;background:transparent;color:var(--mute);padding:7px 6px}
+.hl{display:flex;align-items:center;gap:10px}
+#sb{padding:6px 8px;display:grid;place-items:center;color:var(--mute);background:transparent}
+.acts{align-self:flex-start;display:flex;gap:4px;margin-top:-6px}.acts button{border:0;background:none;padding:2px 6px;font-size:12px;color:var(--mute)}.acts button:hover{color:var(--line)}
+@media (max-width:820px){#side{position:fixed;left:0;top:0;bottom:0;z-index:20;margin-left:0}body.sb-off #side{transform:translateX(-104%)}#scrim{display:block;position:fixed;inset:0;background:rgba(2,5,10,.62);z-index:19}body.sb-off #scrim{display:none}}
 @media (prefers-reduced-motion:reduce){.r,.core,.rip,.m{animation:none!important}}
 @media (max-height:640px){#orb{width:96px}#stage{padding-bottom:8px}}
 </style></head><body>
-<header><h1>F.R.I.D.A.Y.</h1><nav><button id="wk"></button><button id="sp"></button><button id="cfg">설정</button></nav></header>
+<aside id="side" aria-label="대화 목록과 도구">
+<div class="sh"><button id="nc" type="button">새 대화</button></div>
+<input id="sq" type="search" placeholder="대화 검색" autocomplete="off" aria-label="대화 검색">
+<div id="cvl"></div>
+<div class="sg">빠른 실행</div><div id="qa"></div>
+<div class="sf"><button id="fa" type="button">파일 첨부</button><button id="ex" type="button">대화 내보내기</button></div>
+<input type="file" id="fi" hidden multiple accept="image/png,image/jpeg,image/webp,application/pdf,.txt,.md,.csv,.json">
+</aside><div id="scrim"></div>
+<div id="main">
+<header><div class="hl"><button id="sb" type="button" aria-label="사이드바 열기 또는 닫기"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button><h1>F.R.I.D.A.Y.</h1></div><nav><button id="wk"></button><button id="sp"></button><button id="cfg">설정</button></nav></header>
 <div id="stage"><svg id="orb" viewBox="-160 -160 320 320" role="img" aria-label="프라이데이 상태 표시">
 <defs><radialGradient id="cg"><stop offset="0" stop-color="#eaffff"/><stop offset=".38" stop-color="#5ff3ff" stop-opacity=".92"/><stop offset="1" stop-color="#5ff3ff" stop-opacity="0"/></radialGradient></defs>
 <circle class="rip" r="58" stroke-width="1.2"/>
@@ -72,6 +106,7 @@ dialog label{display:block;margin:10px 0 3px;font-size:13px;color:var(--mute)}di
 <div id="log"></div>
 <div id="hr"></div>
 <footer><button id="mic" aria-label="음성으로 말하기"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><input id="t" placeholder="프라이데이에게 말하기" autocomplete="off"><button id="go">전송</button></footer>
+</div>
 <dialog id="d"><h3>설정</h3>
 <label>Gemini API 키 (이 기기 브라우저에만 저장)</label><input id="k" type="password">
 <label>모델 <button id="ml" type="button">목록 조회</button></label><select id="m"></select>
@@ -82,8 +117,19 @@ dialog label{display:block;margin:10px 0 3px;font-size:13px;color:var(--mute)}di
 <script>
 const $=i=>document.getElementById(i),L=localStorage,API="https://generativelanguage.googleapis.com/v1beta/models";
 const SYS="너의 이름은 프라이데이, 사용자의 개인용 AI 비서다. 한국어로 답한다. 냉정하고 명확하게, 군더더기와 아부 없이 말한다. 음성으로 읽히므로 마크다운 기호를 쓰지 말고 기본 3문장 이내로 답한다. 모르는 것은 모른다고 하고, 출처 없는 수치는 단정하지 않는다. 검색 결과나 앱이 준 데이터가 있으면 그것을 근거로 답하고 기준일을 밝힌다. 투자는 확정적 조언 대신 근거와 불확실성을 함께 제시한다.";
-let H=JSON.parse(L.f_h||"[]"),speak=L.f_s!=="0",busy=false,V=[],rec;
-const save=()=>{H=H.slice(-30);while(H.length&&H[0].role!=="user")H.shift();L.f_h=JSON.stringify(H)};
+let speak=L.f_s!=="0",busy=false,V=[],rec,ctl=null,att=[];
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const userTxt=m=>m.d||(m.parts.find(p=>p.text)||{}).text||"";
+const msgTxt=m=>m.role==="user"?userTxt(m):m.parts.map(p=>p.text||"").join("");
+const titleOf=h=>{const m=h.find(x=>x.role==="user"),t=m?userTxt(m).replace(/\s+/g," ").trim():"";return t?t.slice(0,26):"새 대화"};
+let CV=(()=>{try{const o=JSON.parse(L.f_cv||"null");if(o&&Array.isArray(o.list)&&o.list.length)return o}catch(_){}
+ let h0=[];try{h0=JSON.parse(L.f_h||"[]")}catch(_){}const id=uid();return{cur:id,list:[{id,t:titleOf(h0),u:Date.now(),h:h0}]}})();
+const curC=()=>CV.list.find(c=>c.id===CV.cur)||CV.list[0];
+let H=curC().h;
+const strip=h=>h.map(m=>({...m,parts:m.parts.map(p=>p.inline_data?{text:"[첨부 파일: "+(p.name||"파일")+"]"}:p)}));
+function persist(){const mk=()=>JSON.stringify({cur:CV.cur,list:CV.list.map(c=>({id:c.id,t:c.t,u:c.u,auto:c.auto,h:strip(c.h)}))});
+ try{L.f_cv=mk()}catch(_){while(CV.list.length>1){const o=CV.list.filter(c=>c.id!==CV.cur).sort((x,y)=>x.u-y.u)[0];if(!o)break;CV.list=CV.list.filter(c=>c!==o);try{L.f_cv=mk();return}catch(_){}}}}
+const save=()=>{H=H.slice(-30);while(H.length&&H[0].role!=="user")H.shift();const c=curC();c.h=H;c.u=Date.now();if(c.auto!==0)c.t=titleOf(H);persist();try{renderCV()}catch(_){}};
 function add(c,t){const e=document.createElement("div");e.className="m "+c+(c==="e"&&/^(오류|마이크가 차단)/.test(t)?" bad":"");e.textContent=t;$("log").append(e);$("log").scrollTop=1e9;return e}
 function loadV(){V=speechSynthesis.getVoices().filter(v=>/^ko/i.test(v.lang));
  const p=V.find(v=>/heami|sunhi|yuna|google.*(한국|korea)/i.test(v.name))||V[0];
@@ -107,7 +153,7 @@ let timers=[],pend=null;
 const fmt=n=>{const h=Math.floor(n/3600),m=Math.floor(n%3600/60),x=n%60;return[h?h+"시간":"",m?m+"분":"",x?x+"초":""].filter(Boolean).join(" ")||"0초"};
 const nowStr=()=>new Date().toLocaleString("ko-KR",{dateStyle:"full",timeStyle:"short"});
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},600)}catch(_){}}
-const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색) 13) 지원 관리 (예: 지원 추가 부산항만공사 마감 10월 20일, 지원 현황, 지원 1번 면접, 마감 임박) 14) 지출 기록 (예: 점심 8천원 썼어, 이번 달 지출, 지출 취소) 15) 보유 종목과 포트폴리오 점검 (예: 보유 추가 엔비디아 10주 평단 120달러, 보유 목록, 포트폴리오 점검) 16) 종목 데이터 분석 (예: 엔비디아 분석해줘) 17) 백업과 복원 (예: 백업, 복원). 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
+const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색) 13) 지원 관리 (예: 지원 추가 부산항만공사 마감 10월 20일, 지원 현황, 지원 1번 면접, 마감 임박) 14) 지출 기록 (예: 점심 8천원 썼어, 이번 달 지출, 지출 취소) 15) 보유 종목과 포트폴리오 점검 (예: 보유 추가 엔비디아 10주 평단 120달러, 보유 목록, 포트폴리오 점검) 16) 종목 데이터 분석 (예: 엔비디아 분석해줘) 17) 백업과 복원 (예: 백업, 복원) 18) 기억 (예: 기억해 줘 나는 부산에 산다, 기억 목록, 기억 삭제 1번) 19) 이미지나 PDF 분석 (화면에 끌어놓거나 붙여넣고 질문). 왼쪽 사이드바에서 대화 목록, 검색, 빠른 실행, 내보내기를 쓸 수 있습니다. 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다.";
 const LIST=(a,e)=>a.length?a.map((x,i)=>(i+1)+"번 "+x).join(". "):e;
 const CITY={"서울":[37.5665,126.978],"부산":[35.1796,129.0756],"인천":[37.4563,126.7052],"대구":[35.8714,128.6014],"대전":[36.3504,127.3845],"광주":[35.1595,126.8526],"울산":[35.5384,129.3114],"세종":[36.48,127.289],"수원":[37.2636,127.0286],"창원":[35.228,128.6811],"제주":[33.4996,126.5312],"포항":[36.019,129.3435],"김해":[35.2285,128.8894],"성남":[37.42,127.1267],"고양":[37.6584,126.832],"용인":[37.2411,127.1776],"청주":[36.6424,127.489],"전주":[35.8242,127.148],"천안":[36.8151,127.1139],"여수":[34.7604,127.6622],"춘천":[37.8813,127.7298],"강릉":[37.7519,128.8761]};
 const WX={0:"맑음",1:"대체로 맑음",2:"구름 조금",3:"흐림",45:"안개",48:"안개",51:"약한 이슬비",53:"이슬비",55:"강한 이슬비",56:"어는 이슬비",57:"어는 이슬비",61:"약한 비",63:"비",65:"강한 비",66:"어는 비",67:"어는 비",71:"약한 눈",73:"눈",75:"강한 눈",77:"싸락눈",80:"약한 소나기",81:"소나기",82:"강한 소나기",85:"눈 소나기",86:"강한 눈 소나기",95:"뇌우",96:"우박 동반 뇌우",99:"강한 우박 동반 뇌우"};
@@ -181,7 +227,7 @@ function expCmd(t){const am=t.match(/((?:\d[\d,]*(?:\.\d+)?\s*(?:억|만|천|백
   const r=a.filter(f);if(!r.length)return lab+" 기록된 지출이 없습니다.";const g={};r.forEach(e=>g[e.c]=(g[e.c]||0)+e.a);
   const top=Object.entries(g).sort((x,y)=>y[1]-x[1]).slice(0,3).map(x=>x[0]+" "+won(x[1])).join(", ");return lab+" 지출은 "+won(r.reduce((x,e)=>x+e.a,0))+", "+r.length+"건입니다. 많은 순으로 "+top+"."}
  return null}
-const DK=["f_notes","f_todos","f_wl","f_city","f_jobs","f_exp","f_pf"];
+const DK=["f_notes","f_todos","f_wl","f_city","f_jobs","f_exp","f_pf","f_mem"];
 const avS=[];let avN=0;
 async function avGet(q){const now=Date.now();let at=Math.max(now,avN);const w=avS.filter(t=>t>at-61000);if(w.length>=5)at=Math.max(at,w[w.length-5]+61000);avS.push(at);avN=at+1100;
  if(at>now)await new Promise(r=>setTimeout(r,at-now));
@@ -271,8 +317,17 @@ function backupLink(){const o={app:"friday",v:1,t:new Date().toISOString(),data:
  const e=add("f",""),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:"application/json"}));a.download="friday-backup-"+ymd(new Date())+".json";a.textContent="백업 파일 받기 (API 키는 포함되지 않음)";e.append(a)}
 async function restoreFile(f){try{const o=JSON.parse(await f.text());if(o.app!=="friday"||!o.data)throw 0;let n=0;for(const k of DK){if(o.data[k]===undefined)continue;if(k!=="f_city")JSON.parse(o.data[k]);L[k]=o.data[k];n++}return n+"개 항목을 가져왔습니다. 같은 항목은 덮어썼습니다."}catch(_){return"올바른 백업 파일이 아닙니다."}}
 function restoreUI(){const e=add("f","백업 파일을 선택하세요: "),i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=async()=>{if(i.files[0])e.textContent=await restoreFile(i.files[0])};e.append(i)}
+function memCmd(t){let m;
+ if(/^기억\s*(목록|리스트|확인|뭐)/.test(t)){const a=LJ("f_mem");return a.length?"기억하는 내용: "+LIST(a,""):"기억하고 있는 내용이 없습니다. 기억해 줘 뒤에 내용을 말씀해 주세요."}
+ if(/^기억\s*전체\s*(삭제|지워)/.test(t)){if(!LJ("f_mem").length)return"기억하고 있는 내용이 없습니다.";pend="m";return"기억을 모두 삭제할까요? 확인이라고 말씀하세요."}
+ if(m=t.match(/^기억\s*(\d+)\s*번?\s*(삭제|지워)/)){const a=LJ("f_mem"),i=+m[1]-1;if(i<0||i>=a.length)return"그 번호의 기억이 없습니다.";const d=a.splice(i,1)[0];LS("f_mem",a);return"기억에서 지웠습니다: "+d}
+ m=t.match(/^기억해\s*(?:줘|둬|주세요)?\s*[:,]?\s*(.+)$/)||t.match(/^(.+?)\s*(?:라는\s*것을|라는\s*거|라고|을|를)?\s*기억해\s*(?:줘|둬|주세요)?$/);
+ if(m){const c=(m[1]||"").trim();if(!c||/^(줘|둬|주세요)$/.test(c))return"무엇을 기억할까요?";
+  if(/(비밀번호|패스워드|계좌\s*번호|카드\s*번호|주민\s*등록|OTP|인증\s*번호|api\s*키)/i.test(c))return"비밀번호, 계좌·카드 번호 같은 민감한 정보는 저장하지 않습니다.";
+  const a=LJ("f_mem");if(a.length>=20)return"기억은 최대 20개입니다. 기억 삭제 번호로 정리해 주세요.";a.push(c.slice(0,200));LS("f_mem",a);return"기억했습니다. 현재 "+a.length+"개이며, 이 기기 브라우저에만 저장되고 이후 대화에 반영됩니다."}
+ return null}
 function local(t){t=t.trim().replace(/[.!?]+$/,"");
- if(pend){const k=pend;pend=null;if(/^(확인|응|네|예|그래|삭제)/.test(t)){if(k==="n")LS("f_notes",[]);else LS("f_todos",[]);return k==="n"?"메모를 모두 삭제했습니다.":"할 일을 모두 삭제했습니다."}return"취소했습니다."}
+ if(pend){const k=pend;pend=null;if(/^(확인|응|네|예|그래|삭제)/.test(t)){if(k==="n")LS("f_notes",[]);else if(k==="m")LS("f_mem",[]);else LS("f_todos",[]);return k==="n"?"메모를 모두 삭제했습니다.":k==="m"?"기억을 모두 삭제했습니다.":"할 일을 모두 삭제했습니다."}return"취소했습니다."}
  if(/도움말|(뭘|뭐|무엇).*(할\s*수|도와)|할\s*수\s*있는\s*(일|기능|거)|기능\s*(알려|설명)/.test(t))return HELP;
  if(/타이머.*(취소|끄|꺼|중지|멈춰)/.test(t)){const n=timers.length;timers.forEach(x=>clearTimeout(x.id));timers=[];return n?"타이머를 모두 취소했습니다.":"실행 중인 타이머가 없습니다."}
  if(/타이머.*(남았|확인|몇|뭐)/.test(t)){const now=Date.now();timers=timers.filter(x=>x.end>now);return timers.length?timers.map(x=>x.label+" 타이머 "+fmt(Math.ceil((x.end-now)/1000))+" 남았습니다.").join(" "):"실행 중인 타이머가 없습니다."}
@@ -280,6 +335,7 @@ function local(t){t=t.trim().replace(/[.!?]+$/,"");
  if(/^지원\s/.test(t)||/^마감\s*임박/.test(t)){const jr=jobCmd(t);if(jr!==null)return jr}
  if(!/^(메모|할\s*일|지원)/.test(t)){const er=expCmd(t);if(er!==null)return er}
  if(/^보유\s/.test(t)){const pr=pfCmd(t);if(pr!==null)return pr}
+ if(/^기억|기억해\s*(줘|둬|주세요)?$/.test(t)){const mr=memCmd(t);if(mr!==null)return mr}
  if(/포트폴리오|위험\s*점검|리스크\s*점검/.test(t)&&!/^(메모|할\s*일)/.test(t))return portfolio();
  if(/^(데이터\s*)?(백업|내보내기)(해\s*줘|해줘|해)?$/.test(t)||/^데이터\s*백업/.test(t)){backupLink();return"백업 링크를 화면에 표시했습니다. 눌러서 저장하세요."}
  if(/^(데이터\s*)?(복원|가져오기|백업\s*복원)(해\s*줘|해줘|해)?$/.test(t)){restoreUI();return"복원할 백업 파일을 화면에서 선택하세요."}
@@ -333,21 +389,34 @@ function mkSpeaker(){let buf="",n=0,fin=false,st=false,res,p=new Promise(r=>res=
   end(){fin=true;if(speak&&buf.trim())out(buf);buf="";if(!speak||n===0){fin=true;n=0;res()}else chk();return p},
   stop(){buf="";fin=true;n=0;if(st)speechSynthesis.cancel();res()}}}
 async function readSSE(resp,on){const rd=resp.body.getReader(),dec=new TextDecoder();let buf="",txt="",gm=null,pf=null;
- for(;;){const{done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+ for(;;){let d0;try{d0=await rd.read()}catch(e){if(ctl&&ctl.signal.aborted)return{txt,gm,pf,aborted:true};throw e}const{done,value}=d0;if(done)break;buf+=dec.decode(value,{stream:true});let i;
   while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).replace(/\r$/,"");buf=buf.slice(i+1);if(!line.startsWith("data:"))continue;const d=line.slice(5).trim();if(!d||d==="[DONE]")continue;
    let o;try{o=JSON.parse(d)}catch(_){continue}if(o.promptFeedback)pf=o.promptFeedback;const c=o.candidates&&o.candidates[0];if(!c)continue;if(c.groundingMetadata)gm=c.groundingMetadata;
    const t=c.content&&c.content.parts?c.content.parts.filter(q=>!q.thought).map(q=>q.text||"").join(""):"";if(t){txt+=t;on(t,txt)}}}
  return{txt,gm,pf}}
-async function ask(q){q=q.trim();if(busy||!q)return;const lr=await local(q);if(lr!==null){add('u',q);add('f',lr);await say(lr);return}const key=L.f_k;
- if(!key){add("e","설정에서 API 키를 먼저 입력하세요.");$("cfg").click();return}
- busy=true;add("u",q);H.push({role:"user",parts:[{text:await enrich(q)}]});const w=add("f","…");
- try{const base=L.f_m||"gemini-3.8-flash",chain=[base,...["gemini-3.7-flash","gemini-3.5-flash-lite","gemini-3.1-flash-lite"].filter(x=>x!==base)];
-   const mkb=(t,th)=>JSON.stringify({systemInstruction:{parts:[{text:SYS+" 현재 시각: "+nowStr()+". 할 일·메모·타이머는 앱이 직접 처리하므로 대신 처리하는 척하지 않는다."}]},contents:H,...(t?{tools:[{google_search:{}}]}:{}),...(th?{generationConfig:{thinkingConfig:{thinkingLevel:"low"}}}:{})});
+function rmActs(){try{document.querySelectorAll(".acts").forEach(x=>x.remove())}catch(_){}}
+function addActs(){try{rmActs();const last=H[H.length-1];if(!last||last.role!=="model")return;const d=document.createElement("div");d.className="acts";
+ const b1=document.createElement("button");b1.type="button";b1.textContent="복사";b1.onclick=()=>{navigator.clipboard.writeText(msgTxt(last)).then(()=>{b1.textContent="복사됨";setTimeout(()=>b1.textContent="복사",1400)}).catch(()=>{b1.textContent="복사 실패"})};d.append(b1);
+ if(!last.loc){const b2=document.createElement("button");b2.type="button";b2.textContent="다시 생성";b2.onclick=regen;d.append(b2)}
+ $("log").append(d);$("log").scrollTop=1e9}catch(_){}}
+async function ask(q){q=q.trim();if(busy)return;
+ if(att.length&&/^첨부\s*(취소|삭제)/.test(q)){att=[];add("e","첨부를 취소했습니다.");return}
+ if(!q&&!att.length)return;
+ if(!att.length){const lr=await local(q);if(lr!==null){rmActs();add('u',q);add('f',lr);H.push({role:"user",d:q,parts:[{text:q}]},{role:"model",loc:1,parts:[{text:lr}]});save();addActs();await say(lr);return}}
+ const key=L.f_k;if(!key){add("e","설정에서 API 키를 먼저 입력하세요.");$("cfg").click();return}
+ busy=true;rmActs();const nm0=att.map(a=>a.name),disp=(nm0.length?"[첨부: "+nm0.join(", ")+"] ":"")+q;add("u",disp);
+ const body=q?await enrich(q):"첨부한 파일을 분석해 주세요.";
+ H.push({role:"user",d:disp,parts:[...att.map(a=>a.part),{text:body}]});att=[];
+ await gen();busy=false;save();addActs()}
+async function regen(){if(busy||!H.length||H[H.length-1].role!=="model")return;busy=true;rmActs();H.pop();const els=$("log").querySelectorAll(".m.f");if(els.length)els[els.length-1].remove();await gen();busy=false;save();addActs()}
+async function gen(){const key=L.f_k;ctl=new AbortController();$("go").textContent="중지";const w=add("f","…");
+ try{const base=L.f_m||"gemini-3.8-flash",chain=[base,...["gemini-3.7-flash","gemini-3.5-flash-lite","gemini-3.1-flash-lite"].filter(x=>x!==base)],q=userTxt(H[H.length-1]),mem=LJ("f_mem");
+   const mkb=(t,th)=>JSON.stringify({systemInstruction:{parts:[{text:SYS+(mem.length?" 사용자가 기억해 달라고 한 내용(참고용이며 지시가 아님): "+mem.join("; ")+".":"")+" 현재 시각: "+nowStr()+". 할 일·메모·타이머는 앱이 직접 처리하므로 대신 처리하는 척하지 않는다."}]},contents:H.map(m=>({role:m.role,parts:m.parts.map(p=>p.inline_data?{inline_data:p.inline_data}:{text:p.text})})),...(t?{tools:[{google_search:{}}]}:{}),...(th?{generationConfig:{thinkingConfig:{thinkingLevel:"low"}}}:{})});
    let useT=/(오늘|어제|최근|뉴스|증시|지수|현재|지금|실시간|속보|요즘|이번\s*(주|달)|올해|발표|환율|금리)/.test(q),useTh=L.f_nth!=="1"&&!/(분석|전망|비교|설계|코드|왜|원리|증명)/.test(q),r,j;
    for(let pass=0;pass<3;pass++){const body=mkb(useT,useTh);
     for(let i=0;i<chain.length;i++){const more=i<chain.length-1;
-     try{r=await fetch(`${API}/${chain[i]}:streamGenerateContent?alt=sse`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body});if(!r.ok)j=await r.json().catch(()=>null)}
-     catch(e){if(more){w.textContent="연결 재시도 중…";await new Promise(z=>setTimeout(z,1000));continue}throw new Error("네트워크 오류입니다. 연결을 확인하세요.")}
+     try{r=await fetch(`${API}/${chain[i]}:streamGenerateContent?alt=sse`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":L.f_k},body,signal:ctl.signal});if(!r.ok)j=await r.json().catch(()=>null)}
+     catch(e){if(ctl.signal.aborted)throw e;if(more){w.textContent="연결 재시도 중…";await new Promise(z=>setTimeout(z,1000));continue}throw new Error("네트워크 오류입니다. 연결을 확인하세요.")}
      if(r.ok)break;
      if([400,403].includes(r.status)&&(useT||useTh))break;
      if(more&&([429,500,503,504].includes(r.status)||(r.status===404&&i>0))){w.textContent="서버가 혼잡해 다른 모델로 다시 시도합니다…";await new Promise(z=>setTimeout(z,1200));continue}
@@ -356,11 +425,12 @@ async function ask(q){q=q.trim();if(busy||!q)return;const lr=await local(q);if(l
    if(!r.ok)throw new Error(r.status===503?"구글 서버가 혼잡합니다. 잠시 후 다시 시도하세요.":r.status===429?"무료 한도 초과입니다. 잠시 후 다시 시도하세요.":r.status===404?"모델명을 찾을 수 없습니다. 설정에서 모델 목록을 조회하세요.":(j&&j.error&&j.error.message)||r.status);
    const sp=mkSpeaker();w.textContent="";let R;
    try{R=await readSSE(r,(d,all)=>{w.textContent=all;$("log").scrollTop=1e9;sp.feed(d)})}catch(e){sp.stop();throw new Error("응답을 받는 중 연결이 끊겼습니다.")}
-   const t=R.txt;if(!t){sp.stop();throw new Error("응답이 비었습니다"+(R.pf&&R.pf.blockReason?" (차단: "+R.pf.blockReason+")":""))}
-   H.push({role:"model",parts:[{text:t}]});const gm=R.gm,srcs=[...new Set(((gm&&gm.groundingChunks)||[]).map(x=>x.web&&(x.web.title||x.web.uri)).filter(Boolean))].slice(0,4);
-   w.textContent=t+(srcs.length?"\n출처(구글 검색): "+srcs.join(", "):"");await sp.end()
- }catch(e){H.pop();w.remove();add("e","오류: "+e.message)}
- busy=false;save()}
+   if(R.aborted){sp.stop();if(R.txt){H.push({role:"model",parts:[{text:R.txt}]});w.textContent=R.txt+"\n(중단됨)"}else{H.pop();w.remove();add("e","중단했습니다.")}}
+   else{const t=R.txt;if(!t){sp.stop();throw new Error("응답이 비었습니다"+(R.pf&&R.pf.blockReason?" (차단: "+R.pf.blockReason+")":""))}
+    H.push({role:"model",parts:[{text:t}]});const gm=R.gm,srcs=[...new Set(((gm&&gm.groundingChunks)||[]).map(x=>x.web&&(x.web.title||x.web.uri)).filter(Boolean))].slice(0,4);
+    w.textContent=t+(srcs.length?"\n출처(구글 검색): "+srcs.join(", "):"");await sp.end()}
+ }catch(e){H.pop();w.remove();add("e",ctl&&ctl.signal.aborted?"중단했습니다.":"오류: "+e.message)}
+ $("go").textContent="전송";ctl=null}
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 $("mic").onclick=()=>{if(!SR)return add("e","이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용하세요.");
  if(rec){rec.stop();return}
@@ -369,8 +439,8 @@ $("mic").onclick=()=>{if(!SR)return add("e","이 브라우저는 음성 인식�
  rec.onresult=e=>{const x=e.results[0][0].transcript;$("hr").textContent="들은 말: "+x;ask(x)};
  rec.onerror=e=>add("e","음성 인식 오류: "+e.error);
  rec.onend=()=>{rec=null;$("mic").classList.remove("on")};rec.start()};
-$("go").onclick=()=>{const q=$("t").value;$("t").value="";ask(q)};
-$("t").onkeydown=e=>{if(e.key==="Enter")$("go").click()};
+$("go").onclick=()=>{if(busy&&ctl){ctl.abort();return}const q=$("t").value;$("t").value="";ask(q)};
+$("t").onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing&&!busy)$("go").click()};
 const icon=()=>$("sp").textContent=speak?"음성 켜짐":"음성 꺼짐";icon();
 $("sp").onclick=()=>{speak=!speak;L.f_s=speak?"1":"0";icon();if(!speak)speechSynthesis.cancel()};
 $("cfg").onclick=()=>{$("k").value=L.f_k||"";$("r").value=L.f_r||"1.05";$("av").value=L.f_av||"";$("m").innerHTML=`<option>${L.f_m||"gemini-3.8-flash"}</option>`;loadV();$("d").showModal()};
@@ -381,7 +451,7 @@ $("ml").onclick=async()=>{const k=$("k").value.trim()||L.f_k;if(!k)return alert(
   $("m").innerHTML=a.map(n=>`<option>${n}</option>`).join("");$("m").value=a.includes(L.f_m)?L.f_m:a[0]
  }catch(e){alert("조회 실패: "+e.message)}};
 $("ok").onclick=()=>{L.f_k=$("k").value.trim();L.f_m=$("m").value;L.f_v=$("v").value;L.f_av=$("av").value.trim();L.f_r=$("r").value;$("d").close()};
-$("x").onclick=()=>{H=[];save();$("log").innerHTML=""};
+$("x").onclick=()=>{const c=curC();H=[];c.h=H;c.auto=undefined;save();renderLog()};
 let wake=false,act=false,ar,tm,lock,fails=0,rd=300;
 const WR=/(프라이|푸라이|플라이|프리이)\s?(데이|대이|다이|떼이|데|대)|friday|fry\s?day/i,arm=()=>{clearTimeout(tm);tm=setTimeout(()=>{act=false},20000)};
 const ui=()=>{$("wk").classList[wake?"add":"remove"]("on");$("wk").textContent=wake?"청취 중":"청취 꺼짐"};
@@ -421,8 +491,44 @@ else{startWake(false);
   if(q.state==="denied")add("e","마이크가 차단되어 있습니다. 주소창 왼쪽 자물쇠 아이콘에서 마이크를 허용으로 바꾼 뒤 새로고침하세요.");
   else if(q.state==="prompt")add("e","마이크 허용 창이 뜨면 '허용'을 눌러 주세요. 한 번 허용하면 다음부터는 묻지 않습니다.");
   q.onchange=()=>{if(q.state==="granted"){fails=0;if(!paused&&!wake)startWake(false)}}}).catch(()=>{})}catch(_){}}
-H.length?H.forEach(h=>add(h.role==="user"?"u":"f",h.parts[0].text)):add("f","프라이데이 대기 중입니다.");
 
+
+
+function renderLog(init){const keep=init?[...$("log").children]:[];$("log").innerHTML="";H.length?H.forEach(m=>add(m.role==="user"?"u":"f",msgTxt(m))):add("f","프라이데이 대기 중입니다.");keep.forEach(n=>$("log").append(n));addActs()}
+const mobile=()=>{try{return matchMedia("(max-width:820px)").matches}catch(_){return false}};
+function sbSet(on,keep){document.body.classList[on?"remove":"add"]("sb-off");if(keep){try{L.f_sb=on?"1":"0"}catch(_){}}}
+$("sb").onclick=()=>sbSet(document.body.classList.contains("sb-off"),!mobile());$("scrim").onclick=()=>sbSet(false);
+function mkBtn(txt,fn,cls,label){const b=document.createElement("button");b.type="button";b.textContent=txt;if(cls)b.className=cls;if(label)b.setAttribute("aria-label",label);b.onclick=fn;return b}
+function renderCV(){const q=($("sq").value||"").trim().toLowerCase(),box=$("cvl");box.innerHTML="";
+ const rows=CV.list.slice().sort((a,b)=>b.u-a.u).filter(c=>!q||c.t.toLowerCase().includes(q)||c.h.some(m=>msgTxt(m).toLowerCase().includes(q)));
+ rows.forEach(c=>{const row=document.createElement("div");row.className="ci"+(c.id===CV.cur?" on":"");
+  const x=document.createElement("span");x.className="cx";x.append(mkBtn("수정",()=>renameCV(c.id),"","대화 이름 변경"),mkBtn("삭제",()=>delCV(c.id),"","대화 삭제"));
+  row.append(mkBtn(c.t,()=>switchTo(c.id),"ct"),x);box.append(row)});
+ if(!rows.length){const n=document.createElement("div");n.className="none";n.textContent=q?"검색 결과가 없습니다.":"대화가 없습니다.";box.append(n)}}
+function switchTo(id){if(busy||id===CV.cur)return;persist();CV.cur=id;H=curC().h;rmActs();renderLog();renderCV();persist();if(mobile())sbSet(false)}
+function newChat(){if(busy)return;if(!H.length){if(mobile())sbSet(false);$("t").focus();return}const id=uid();CV.list.push({id,t:"새 대화",u:Date.now(),h:[]});
+ if(CV.list.length>40){const o=CV.list.filter(c=>c.id!==id).sort((a,b)=>a.u-b.u)[0];CV.list=CV.list.filter(c=>c!==o)}
+ CV.cur=id;H=curC().h;att=[];renderLog();renderCV();persist();if(mobile())sbSet(false);$("t").focus()}
+function renameCV(id){const c=CV.list.find(x=>x.id===id);if(!c)return;const n=prompt("대화 이름",c.t);if(n&&n.trim()){c.t=n.trim().slice(0,40);c.auto=0;persist();renderCV()}}
+function delCV(id){if(busy)return;if(!confirm("이 대화를 삭제할까요?"))return;CV.list=CV.list.filter(c=>c.id!==id);
+ if(!CV.list.length)CV.list.push({id:uid(),t:"새 대화",u:Date.now(),h:[]});
+ if(id===CV.cur){CV.cur=CV.list.slice().sort((a,b)=>b.u-a.u)[0].id;H=curC().h;renderLog()}persist();renderCV()}
+$("nc").onclick=newChat;$("sq").oninput=renderCV;
+const QA=[["오늘 브리핑","브리핑"],["미국 증시","미국 증시 어땠어"],["포트폴리오 점검","포트폴리오 점검"],["지원 현황","지원 현황"],["이번 달 지출","이번 달 지출"],["할 일 목록","할 일 목록"],["날씨","날씨"],["기억 목록","기억 목록"],["백업","백업"]];
+QA.forEach(([l,c])=>$("qa").append(mkBtn(l,()=>{if(mobile())sbSet(false);ask(c)})));
+$("ex").onclick=()=>{const c=curC(),md="# "+c.t+"\n\n"+H.map(m=>(m.role==="user"?"**나**\n\n":"**프라이데이**\n\n")+msgTxt(m)+"\n").join("\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([md],{type:"text/markdown"}));a.download="friday-"+ymd(new Date())+".md";document.body.append(a);a.click();a.remove()};
+async function addFiles(fl){for(const f of fl){try{
+  if(/^image\/(png|jpeg|webp)$/.test(f.type)||f.type==="application/pdf"){if(f.size>8e6){add("e",(f.name||"파일")+": 8MB를 넘어 첨부할 수 없습니다.");continue}
+   const b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]);r.onerror=no;r.readAsDataURL(f)});att.push({name:f.name||"붙여넣은 이미지",part:{inline_data:{mime_type:f.type,data:b64},name:f.name||"붙여넣은 이미지"}})}
+  else if(/^text\//.test(f.type)||/\.(txt|md|csv|json)$/i.test(f.name||"")){if(f.size>2e5){add("e",f.name+": 200KB를 넘는 텍스트는 첨부할 수 없습니다.");continue}att.push({name:f.name,part:{text:"[첨부 파일 "+f.name+" 내용]\n"+(await f.text()).slice(0,60000)}})}
+  else add("e",(f.name||"파일")+": 지원하지 않는 형식입니다. 이미지(PNG, JPG, WEBP), PDF, 텍스트만 첨부할 수 있습니다.")}
+  catch(_){add("e","파일을 읽지 못했습니다.")}}
+ if(att.length)add("e","첨부됨: "+att.map(a=>a.name).join(", ")+". 질문을 입력하세요. 취소하려면 '첨부 취소'라고 하세요.")}
+$("fa").onclick=()=>{$("fi").click()};$("fi").onchange=e=>{addFiles([...e.target.files]);e.target.value=""};
+document.addEventListener("dragover",e=>e.preventDefault());
+document.addEventListener("drop",e=>{e.preventDefault();if(e.dataTransfer&&e.dataTransfer.files.length)addFiles([...e.dataTransfer.files])});
+document.addEventListener("paste",e=>{const f=[...((e.clipboardData&&e.clipboardData.files)||[])];if(f.length){e.preventDefault();addFiles(f)}});
+sbSet(mobile()?false:L.f_sb!=="0");renderLog(true);renderCV();
 const STT={off:"청취 꺼짐",listen:"듣고 있습니다",think:"처리 중",speak:"응답 중",act:"말씀하세요"};
 function setSt(){try{const B=document.body,st=!wake?"off":busy?"think":speechSynthesis.speaking?"speak":"listen",a=wake&&act&&st==="listen"?"1":"0",tx=a==="1"?STT.act:STT[st];
  if(B.dataset.st!==st)B.dataset.st=st;if(B.dataset.act!==a)B.dataset.act=a;if($("stt").textContent!==tx)$("stt").textContent=tx}catch(_){}}
