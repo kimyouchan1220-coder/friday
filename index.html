@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#01060d"><title>프라이데이</title>
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>프라이데이</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=Oxanium:wght@300;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -166,30 +166,35 @@ body[data-st=off] .eq s{animation:none;transform:scaleY(.12);opacity:.25}
 h1{white-space:nowrap}
 @media (max-width:480px){h1::before{display:none}}
 @media (prefers-reduced-motion:reduce){#hold,.eq s{animation:none!important}}
-/* ===== v3: 영화풍 홀로그램 · 아크 리액터 ===== */
-#orb{filter:drop-shadow(0 0 6px rgba(114,220,255,.5)) drop-shadow(-1.2px 0 rgba(255,90,110,.15)) drop-shadow(1.2px 0 rgba(70,130,255,.26))}
-#orb .rglow{fill:url(#rg);stroke:none}
-#orb .plasma{stroke:#d6f7ff;animation:plasma 3.2s ease-in-out infinite}
-#orb .tri{stroke:#fff;fill:rgba(214,247,255,.16);animation:plasma 3.2s ease-in-out infinite}
-#orb .tri2{stroke:#e4fbff;fill:none}
-#orb .coil{fill:rgba(114,220,255,.18)}
-#orb .core{fill:url(#cg)}
-@keyframes plasma{50%{opacity:.78}}
-body[data-st=speak] #orb .plasma,body[data-st=speak] #orb .tri{animation-duration:.8s}
-body[data-st=think] #orb .plasma,body[data-st=think] #orb .tri{animation:flick .5s steps(2) infinite}
-body[data-act="1"] #orb .plasma{stroke:#ffe3b8}
-body[data-st=off] #orb .plasma,body[data-st=off] #orb .tri{animation:none}
-#hold{animation:boot 1.3s cubic-bezier(.2,.7,.2,1) both,holo 9s linear 1.3s infinite}
-@keyframes holo{0%,45%,48%,70%,73%,100%{opacity:1}46%{opacity:.8}47%{opacity:.95}71%{opacity:.9}72%{opacity:.97}}
-#hold::before{content:"";position:absolute;left:6%;right:6%;top:-20%;height:18%;pointer-events:none;z-index:3;background:linear-gradient(180deg,transparent,rgba(114,220,255,.12),transparent);-webkit-mask-image:radial-gradient(closest-side,#000 40%,transparent 100%);mask-image:radial-gradient(closest-side,#000 40%,transparent 100%);animation:band 5.5s linear infinite}
-@keyframes band{to{top:104%}}
-#hold::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(1,8,16,.3) 2px 3px);-webkit-mask-image:radial-gradient(circle closest-side at 50% 44%,#000 45%,transparent 100%);mask-image:radial-gradient(circle closest-side at 50% 44%,#000 45%,transparent 100%)}
-#beam{background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(114,220,255,.06) 5px 6px),linear-gradient(0deg,rgba(114,220,255,.34),rgba(114,220,255,.07) 55%,transparent)}
-#spark{position:absolute;left:50%;bottom:10%;width:46%;height:72%;transform:translateX(-50%);pointer-events:none;background:radial-gradient(circle,#e4fbff 0 .8px,transparent 1.5px) 0 0/22px 34px,radial-gradient(circle,#8fe3ff 0 .8px,transparent 1.4px) 11px 17px/31px 41px;-webkit-mask-image:linear-gradient(0deg,#000 5%,transparent 88%);mask-image:linear-gradient(0deg,#000 5%,transparent 88%);opacity:.6;animation:rise 7s linear infinite}
-@keyframes rise{to{background-position:0 -34px,11px -24px}}
-#base{filter:drop-shadow(0 0 6px rgba(114,220,255,.5))}
-.hud b{text-shadow:0 0 14px rgba(114,220,255,.42)}
-@media (prefers-reduced-motion:reduce){#hold,#hold::before,#spark,#orb .plasma,#orb .tri{animation:none!important}}
+/* ===== v4: 입자 구체 ===== */
+:root{--void:#000;--deep:#03060c;--glass:rgba(12,20,36,.55);--line:#8dbcff;--a:#8dbcff;--b:#3d7bff;--n:#ffc27a;--dim:rgba(150,190,255,.18);--gold:#ffc27a;--text:#eaf2ff;--mute:#8a9bb4;--cut:none}
+body{background:radial-gradient(70% 46% at 50% 22%,rgba(30,70,170,.17),transparent 72%),#000}
+body::before,body::after,.fr,#stage::before,#stage::after,header::after,footer::before,.m::before,.m::after,#hudL,#hudR{display:none}
+h1{font:400 13px var(--disp);letter-spacing:.42em;color:var(--text);opacity:.85;text-shadow:none}
+h1::before{display:none}
+nav button{border-radius:6px;background:transparent;border:1px solid var(--dim);color:var(--mute)}
+nav button:hover{color:var(--text);background:rgba(141,188,255,.08)}
+#stage{display:block;height:clamp(320px,56vh,580px)}
+#hold{position:absolute;inset:0;height:auto;aspect-ratio:auto;max-width:none;margin:0;animation:fade 1.4s ease both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#pc{display:block;width:100%;height:100%}
+#cap{position:absolute;left:50%;transform:translateX(-50%);bottom:30px;width:min(86%,820px);min-height:1.45em;text-align:center;font:400 clamp(16px,2.1vw,22px)/1.45 "Noto Sans KR",system-ui,sans-serif;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.95);pointer-events:none;z-index:2;word-break:keep-all}
+#stt{display:block;bottom:8px;font-size:12px;letter-spacing:.08em;z-index:2}
+.m{padding:10px 15px;border-radius:12px;border:1px solid rgba(150,190,255,.16);-webkit-backdrop-filter:none;backdrop-filter:none}
+.f{background:rgba(60,110,230,.09)}
+.u{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.12);color:#fff}
+.e{padding:2px 8px;border:0;border-radius:0;background:none}
+footer{background:linear-gradient(0deg,#000 45%,transparent)}
+#t{border-radius:22px;background:rgba(255,255,255,.05);border:1px solid var(--dim);padding:11px 18px}
+#t:focus{border-color:var(--line);box-shadow:none}
+#mic{background:rgba(255,255,255,.05)}
+#go{border-radius:22px;background:#cfe0ff;color:#04101f;font-weight:500;letter-spacing:0;border:0;box-shadow:none}
+#go:hover{background:#fff;box-shadow:none}
+#side{background:#03060c;border-right:1px solid rgba(255,255,255,.07)}
+dialog{background:#05080f;border-radius:10px;box-shadow:none}
+@media (max-width:720px){#stage{height:clamp(250px,40vh,360px)}#cap{bottom:28px}}
+@media (max-height:600px){#stage{height:230px}}
+@media (prefers-reduced-motion:reduce){#hold{animation:none!important}}
 </style></head><body>
 <aside id="side" aria-label="대화 목록과 도구">
 <div class="sh"><button id="nc" type="button">새 대화</button></div>
@@ -202,10 +207,7 @@ body[data-st=off] #orb .plasma,body[data-st=off] #orb .tri{animation:none}
 <div id="main"><i class="fr"></i>
 <header><div class="hl"><button id="sb" type="button" aria-label="사이드바 열기 또는 닫기"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button><h1>F.R.I.D.A.Y.</h1></div><nav><button id="wk"></button><button id="sp"></button><button id="cfg">설정</button></nav></header>
 <div id="stage"><div id="hudL" class="hud"><b id="hClk">--:--</b><span id="hDate"></span></div>
-<div id="hold"><div id="beam"></div><div id="spark"></div><svg id="orb" viewBox="-200 -200 400 400" role="img" aria-label="프라이데이 상태 표시"></svg>
-<svg id="base" viewBox="-200 -40 400 80" aria-hidden="true"><defs><radialGradient id="eg"><stop offset="0" style="stop-color:var(--a)" stop-opacity=".8"/><stop offset="1" style="stop-color:var(--a)" stop-opacity="0"/></radialGradient></defs>
-<ellipse class="em" rx="176" ry="30"/><ellipse rx="150" ry="24" stroke-width="1.4" opacity=".9"/><ellipse class="bd" rx="184" ry="32" stroke-width="1" stroke-dasharray="4 10" opacity=".6"/><ellipse rx="110" ry="17" stroke-width="1" opacity=".6"/><ellipse rx="70" ry="11" stroke-width="2" opacity=".85"/><ellipse class="em" rx="38" ry="6" style="fill:#e8ffff"/></svg>
-<div class="scan"></div></div>
+<div id="hold"><canvas id="pc" role="img" aria-label="프라이데이 상태 표시"></canvas></div><div id="cap" aria-live="polite"></div>
 <div id="hudR" class="hud"><b id="hSt"></b><span id="hSub"></span><i class="eq" aria-hidden="true"><s></s><s></s><s></s><s></s><s></s></i></div><div id="stt"></div></div>
 <div id="log"></div>
 <div id="hr"></div>
@@ -1110,9 +1112,10 @@ function wavBlob(ab){const n=ab.length,c=ab.getChannelData(0),sr=ab.sampleRate,b
  w(0,"RIFF");dv.setUint32(4,36+n*2,true);w(8,"WAVEfmt ");dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,"data");dv.setUint32(40,n*2,true);
  for(let i=0;i<n;i++)dv.setInt16(44+i*2,Math.max(-1,Math.min(1,c[i]))*32767,true);return new Blob([buf],{type:"audio/wav"})}
 function playBuf(ab,gen){return new Promise(res=>{if(gen!==TGEN)return res();let url=null;try{url=URL.createObjectURL(wavBlob(ab));const a=new Audio(url);a.preservesPitch=true;a.mozPreservesPitch=true;a.webkitPreservesPitch=true;a.playbackRate=rate();
- const h={stop(){a.onended=null;a.onerror=null;try{a.pause()}catch(_){}try{URL.revokeObjectURL(url)}catch(_){}}},done=()=>{if(AXS===h)AXS=null;try{URL.revokeObjectURL(url)}catch(_){}res()};
+ let an=null;try{const c=getCtx();if(c.state==="running"){const s=c.createMediaElementSource(a);an=c.createAnalyser();an.fftSize=512;an.smoothingTimeConstant=.5;s.connect(an);an.connect(c.destination);ANA=an}}catch(_){an=null}
+ const h={stop(){if(an&&ANA===an)ANA=null;a.onended=null;a.onerror=null;try{a.pause()}catch(_){}try{URL.revokeObjectURL(url)}catch(_){}}},done=()=>{if(an&&ANA===an)ANA=null;if(AXS===h)AXS=null;try{URL.revokeObjectURL(url)}catch(_){}res()};
  a.onended=done;a.onerror=done;AXS=h;pauseL();a.play().catch(done)}catch(_){res()}})}
-function browserSay(t,lg,gen){return new Promise(res=>{if(gen!==TGEN)return res();const u=new SpeechSynthesisUtterance(t);u.lang=lg;const v=/^ko/i.test(lg)?V.find(x=>x.name===(L.f_v||$("v").value)):pickV(lg);if(v)u.voice=v;u.rate=rate();u.onend=u.onerror=()=>res();pauseL();speechSynthesis.speak(u)})}
+function browserSay(t,lg,gen){return new Promise(res=>{if(gen!==TGEN)return res();const u=new SpeechSynthesisUtterance(t);u.lang=lg;const v=/^ko/i.test(lg)?V.find(x=>x.name===(L.f_v||$("v").value)):pickV(lg);if(v)u.voice=v;u.rate=rate();u.onend=u.onerror=()=>res();capSet(t);pauseL();speechSynthesis.speak(u)})}
 async function decodeAudio(b64,mime){const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const c=getCtx();
  if(u[0]===82&&u[1]===73&&u[2]===70&&u[3]===70)return c.decodeAudioData(u.buffer.slice(0));
  const rm=/rate=(\d+)/.exec(mime||""),rate=rm?+rm[1]:24000,n=u.length>>1,ab=c.createBuffer(1,n,rate),ch=ab.getChannelData(0),dv=new DataView(u.buffer);for(let i=0;i<n;i++)ch[i]=dv.getInt16(i*2,true)/32768;return ab}
@@ -1141,17 +1144,17 @@ function say(t,lg){return new Promise(res=>{if(!speak||!t)return res();cancelSpe
   const need=i=>{if(i<cs.length&&!ps[i]){ps[i]=ttsFetch(cs[i],lg);ps[i].catch(()=>{})}};need(0);need(1);
   (async()=>{try{for(let i=0;i<cs.length;i++){if(gen!==TGEN)break;need(i);need(i+2);let ab;
     try{ab=await ps[i];if(!(await ctxReady()))throw new Error("오디오 재생이 차단되었습니다. 화면을 한 번 눌러 주세요")}catch(e){vNote(e);await browserSay(cs[i],lg,gen);continue}
-    await playBuf(ab,gen)}}finally{if(gen===TGEN)RPL=Math.max(0,RPL-1);res();after(gen)}})();return}
+    capSet(cs[i]);await playBuf(ab,gen)}}finally{if(gen===TGEN)RPL=Math.max(0,RPL-1);res();after(gen)}})();return}
  const u=new SpeechSynthesisUtterance(clean);u.lang=lg;const v=/^ko/i.test(lg)?V.find(x=>x.name===(L.f_v||$("v").value)):pickV(lg);if(v)u.voice=v;u.rate=rate();
- u.onend=u.onerror=()=>{res();if(wake)setTimeout(listen,400)};speechSynthesis.speak(u)})}
+ u.onend=u.onerror=()=>{res();if(wake)setTimeout(listen,400)};capSet(clean);speechSynthesis.speak(u)})}
 function mkSpeaker(){let buf="",n=0,fin=false,st=false,cnt=0,gen=0,chain=Promise.resolve(),res,p=new Promise(r=>res=r);
  const lg0=()=>SPL||"ko-KR";
  const chk=()=>{if(fin&&n<=0){n=0;res();if(wake)setTimeout(listen,400)}};
  const out=t=>{t=t.replace(/[*#`_>~]/g,"").trim();if(!t)return;if(!st){st=true;cancelSpeech();pauseL();gen=TGEN}cnt++;const lg=lg0();
   if(engOf(lg)!=="browser"){n++;RPL++;const pf=ttsFetch(t,lg);pf.catch(()=>{});
-   chain=chain.then(async()=>{try{if(gen!==TGEN)return;let ab;try{ab=await pf;if(!(await ctxReady()))throw new Error("오디오 재생이 차단되었습니다. 화면을 한 번 눌러 주세요")}catch(e){vNote(e);await browserSay(t,lg,gen);return}await playBuf(ab,gen)}finally{n--;if(gen===TGEN)RPL=Math.max(0,RPL-1);chk()}});return}
+   chain=chain.then(async()=>{try{if(gen!==TGEN)return;let ab;try{ab=await pf;if(!(await ctxReady()))throw new Error("오디오 재생이 차단되었습니다. 화면을 한 번 눌러 주세요")}catch(e){vNote(e);await browserSay(t,lg,gen);return}capSet(t);await playBuf(ab,gen)}finally{n--;if(gen===TGEN)RPL=Math.max(0,RPL-1);chk()}});return}
   const u=new SpeechSynthesisUtterance(t);u.lang=lg;const v=/^ko/i.test(lg)?V.find(x=>x.name===(L.f_v||$("v").value)):pickV(lg);if(v)u.voice=v;u.rate=rate();
-  n++;u.onend=u.onerror=()=>{n--;chk()};speechSynthesis.speak(u)};
+  u.onstart=()=>capSet(t);n++;u.onend=u.onerror=()=>{n--;chk()};speechSynthesis.speak(u)};
  return{feed(t){if(!speak)return;buf+=t;for(;;){const thr=engOf(lg0())!=="browser"&&cnt>0?90:12,re=/(?:(?<!\d)\.|[!?。\n])(?=\s|$)/g;let m,cut=-1;while(m=re.exec(buf)){if(m.index+1>=thr){cut=m.index+1;break}}if(cut<0)break;out(buf.slice(0,cut));buf=buf.slice(cut)}},
   end(){fin=true;if(speak&&buf.trim())out(buf);buf="";if(!speak||n===0){fin=true;n=0;res()}else chk();return p},
   stop(){buf="";fin=true;n=0;if(st)cancelSpeech();res()}}}
@@ -1420,45 +1423,52 @@ document.addEventListener("drop",e=>{e.preventDefault();if(e.dataTransfer&&e.dat
 document.addEventListener("paste",e=>{const f=[...((e.clipboardData&&e.clipboardData.files)||[])];if(f.length){e.preventDefault();addFiles(f)}});
 sbSet(mobile()?false:L.f_sb!=="0");renderLog(true);renderCV();
 
-function buildOrb(){
-  const C=(r,w,da,op,cls)=>`<circle ${cls?`class="${cls}"`:""} r="${r}" stroke-width="${w}"${da?` stroke-dasharray="${da}"`:""} opacity="${op}"/>`;
-  const cir=r=>2*Math.PI*r,P=(r,t)=>{const a=t*Math.PI/180;return[(r*Math.sin(a)).toFixed(2),(-r*Math.cos(a)).toFixed(2)]};
-  let bars="",lbl="",coil="",gyro="";
-  for(let i=0;i<72;i++){const d=((i*7)%13)/13*.9;bars+=`<g transform="rotate(${i*5})"><rect class="bar" x="-.7" y="-139" width="1.4" height="9" style="animation-delay:-${d.toFixed(2)}s"/></g>`}
-  for(let i=0;i<12;i++)lbl+=`<text class="lbl" transform="rotate(${i*30}) translate(0,-181)" text-anchor="middle">${String(i*30).padStart(3,"0")}</text>`;
-  for(let i=0;i<10;i++){const c=i*36,a0=c-13,a1=c+13,o0=P(94,a0),o1=P(94,a1),i1=P(62,a1),i0=P(62,a0);
-    coil+=`<path class="coil" d="M${o0} A94 94 0 0 1 ${o1} L${i1} A62 62 0 0 0 ${i0} Z" stroke-width=".9"/>`;
-    [70,78,86].forEach(r=>{const w0=P(r,a0+2.4),w1=P(r,a1-2.4);coil+=`<path d="M${w0} A${r} ${r} 0 0 1 ${w1}" stroke-width=".55" opacity=".55"/>`})}
-  for(let i=0;i<3;i++)gyro+=`<g transform="rotate(${i*60+20})"><ellipse class="mer" rx="152" ry="152" stroke-width=".7" opacity=".34" style="animation-delay:-${(i*3).toFixed(2)}s"/></g>`;
-  const T=cir(194),T2=cir(188),SEG=cir(172),TH=cir(112);
-  $("orb").innerHTML=`<defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a)"/><stop offset="1" style="stop-color:var(--b)"/></linearGradient>
- <radialGradient id="cg"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="#e4fbff" stop-opacity=".98"/><stop offset=".62" style="stop-color:var(--a)" stop-opacity=".55"/><stop offset="1" style="stop-color:var(--a)" stop-opacity="0"/></radialGradient>
- <radialGradient id="hg"><stop offset=".6" style="stop-color:var(--b)" stop-opacity="0"/><stop offset=".88" style="stop-color:var(--b)" stop-opacity=".16"/><stop offset="1" style="stop-color:var(--b)" stop-opacity="0"/></radialGradient>
- <radialGradient id="rg"><stop offset="0" style="stop-color:var(--a)" stop-opacity=".30"/><stop offset=".7" style="stop-color:var(--b)" stop-opacity=".10"/><stop offset="1" style="stop-color:var(--b)" stop-opacity="0"/></radialGradient>
- <linearGradient id="sw" gradientUnits="userSpaceOnUse" x1="0" y1="-150" x2="-115" y2="-96"><stop offset="0" style="stop-color:var(--a)" stop-opacity=".42"/><stop offset="1" style="stop-color:var(--a)" stop-opacity="0"/></linearGradient>
- <filter id="bl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-<circle class="halo" r="199"/><circle class="rglow" r="150"/>
-${gyro}
-<g class="r r1"><circle r="194" stroke-width="5" stroke-dasharray="0.7 ${(T/72-.7).toFixed(3)}" opacity=".55"/><circle r="188" stroke-width="10" stroke-dasharray="1.3 ${(T2/12-1.3).toFixed(3)}" opacity=".9"/><circle r="197" stroke-width=".6" opacity=".5"/>${lbl}</g>
-<g class="r r2">${C(172,2,`250 14 170 14 210 14 330 ${(SEG-1016).toFixed(2)}`,.9,"grad")}${C(172,.6,"",.4)}</g>
-<g class="r r3">${C(162,.9,"1.2 6",.5)}<circle class="node" cx="162" r="3"/><circle class="node" cx="-162" r="1.8"/><circle class="node" cy="162" r="1.5"/></g>
-<g class="r r4">${C(150,.9,"40 8 4 8",.4)}</g>
-<path class="sweep sw" d="M0,0 L0,-150 A150,150 0 0 0 -115,-96 Z"/>
-<path class="sweep" d="M0,0 L0,-150" stroke-width="1" style="stroke:var(--a)"/>
-${bars}
-<g class="reactor">
- <circle r="122" stroke-width=".6" opacity=".55"/><circle r="118" stroke-width="2.2" opacity=".95" class="grad"/>
- <g class="r r5"><circle r="111" stroke-width="6" stroke-dasharray="1.2 ${(TH/60-1.2).toFixed(3)}" opacity=".6"/></g>
- <circle r="102" stroke-width="1.2" opacity=".85"/><circle r="96" stroke-width=".6" opacity=".45"/>
- ${coil}
- <circle r="60" stroke-width=".8" opacity=".6"/>
- <circle class="plasma" r="55" stroke-width="5" filter="url(#bl)"/><circle r="49" stroke-width="1.2" opacity=".8"/>
- <circle class="core" r="46"/>
- <polygon class="tri" points="0,-31 26.8,15.5 -26.8,15.5" stroke-width="1.8" filter="url(#bl)"/>
- <polygon class="tri2" points="0,17 14.7,-8.5 -14.7,-8.5" stroke-width="1" opacity=".8"/>
- <circle class="rip" r="46" stroke-width="1"/><circle class="pt" r="3.4"/>
-</g>`}
-buildOrb();
+/* ===== 입자 구체: 음성 크기에 맞춰 커지고 줄어드는 상태 표시 ===== */
+let ANA=null,KICK=0,capTm=0,capOff=0;
+try{const _sp=speechSynthesis.speak.bind(speechSynthesis);speechSynthesis.speak=u=>{try{u.addEventListener("boundary",()=>{KICK=1})}catch(_){}return _sp(u)}}catch(_){}
+function capClr(){clearTimeout(capTm);capTm=0;const e=$("cap");if(e&&e.textContent)e.textContent=""}
+function capSet(t){try{const e=$("cap");if(!e)return;clearTimeout(capTm);t=String(t||"").replace(/\s+/g," ").trim();if(!t){e.textContent="";return}
+ const ps=[];let cur="";t.split(" ").forEach(w=>{if(cur&&(cur+" "+w).length>60){ps.push(cur);cur=w}else cur=cur?cur+" "+w:w});if(cur)ps.push(cur);
+ const sp=Math.max(.5,rate()),show=i=>{e.textContent=ps[i];if(i+1<ps.length)capTm=setTimeout(()=>show(i+1),Math.max(900,ps[i].length*125/sp))};show(0)}catch(_){}}
+(function(){
+ const cv=$("pc");if(!cv||!cv.getContext)return;const g=cv.getContext("2d");if(!g)return;
+ const N=innerWidth<721?1800:3400,X=new Float32Array(N),Y=new Float32Array(N),Z=new Float32Array(N),RD=new Float32Array(N),PH=new Float32Array(N),SZ=new Float32Array(N),BR=new Float32Array(N),CB=new Uint8Array(N);
+ const PX=new Float32Array(N),PY=new Float32Array(N),PA=new Float32Array(N),PS=new Float32Array(N);
+ for(let i=0;i<N;i++){const u=Math.random()*2-1,th=Math.random()*Math.PI*2,s=Math.sqrt(1-u*u);X[i]=s*Math.cos(th);Y[i]=u;Z[i]=s*Math.sin(th);
+  RD[i]=Math.random()<.62?.9+Math.random()*.1:Math.cbrt(Math.random())*.92;PH[i]=Math.random()*Math.PI*2;SZ[i]=Math.random();BR[i]=.45+Math.random()*.55;
+  const c=Math.random();CB[i]=c<.45?0:c<.8?1:2}
+ const COOL=["rgb(214,232,255)","rgb(112,170,255)","rgb(58,110,255)"],WARM=["rgb(255,230,190)","rgb(255,180,104)","rgb(255,140,72)"];
+ let W=0,H=0,D=1;
+ function size(){const r=cv.getBoundingClientRect();D=Math.min(2,window.devicePixelRatio||1);W=r.width;H=r.height;cv.width=Math.max(1,Math.round(W*D));cv.height=Math.max(1,Math.round(H*D))}
+ size();if(window.ResizeObserver)new ResizeObserver(size).observe(cv);else addEventListener("resize",size);
+ const RM=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
+ let amp=0,t=0,ang=0,last=performance.now();
+ function frame(now){
+  requestAnimationFrame(frame);
+  const dt=Math.min(.05,Math.max(.001,(now-last)/1000));last=now;t+=dt;
+  const st=document.body.dataset.st||"listen",act=document.body.dataset.act==="1";
+  let tg=0;
+  if(ANA){try{const b=ANA.b||(ANA.b=new Uint8Array(ANA.fftSize));ANA.getByteTimeDomainData(b);let s=0;for(let i=0;i<b.length;i++){const v=(b[i]-128)/128;s+=v*v}tg=Math.min(1,Math.max(0,Math.sqrt(s/b.length)-.012)*4.6)}catch(_){tg=0}}
+  else if(st==="speak"){KICK*=Math.exp(-dt*7);tg=.16+.55*KICK+.24*Math.abs(Math.sin(t*8.3)*Math.sin(t*2.9+1))}
+  else KICK=0;
+  amp+=(tg-amp)*(1-Math.exp(-dt*(tg>amp?30:7)));
+  if(!RM)ang+=dt*(st==="think"?.7:st==="off"?.03:.13);
+  const al=st==="off"?.35:1,cx=W/2,cy=H*.46,R0=Math.min(H*.32,W*.4);
+  let sc=(1+.012*Math.sin(t*1.3))*(1+.16*amp);if(st==="think")sc*=.93+.02*Math.sin(t*5);
+  const R=R0*sc;
+  g.setTransform(D,0,0,D,0,0);g.globalCompositeOperation="source-over";g.globalAlpha=1;g.clearRect(0,0,W,H);
+  const w=R*1.4,gr=g.createRadialGradient(cx,cy,R*.5,cx,cy,w);
+  gr.addColorStop(0,"rgba(30,80,220,0)");gr.addColorStop(.7,"rgba("+(act?"255,150,60":"50,110,255")+","+((.09+.15*amp)*al).toFixed(3)+")");gr.addColorStop(1,"rgba(30,80,220,0)");
+  g.fillStyle=gr;g.fillRect(0,0,W,H);
+  const cy0=Math.cos(ang),sy=Math.sin(ang),ax=.38+.06*Math.sin(t*.23),cX=Math.cos(ax),sX=Math.sin(ax),fl=amp*.22;
+  for(let i=0;i<N;i++){const ph=PH[i],r=RD[i]*(1+fl*(.5+.5*Math.sin(ph*17+t*11)));
+   const x=X[i]*r+.012*Math.sin(t*.9+ph*7),y=Y[i]*r+.012*Math.sin(t*1.1+ph*5),z=Z[i]*r+.012*Math.sin(t*.8+ph*3);
+   const x1=x*cy0+z*sy,z1=-x*sy+z*cy0,y2=y*cX-z1*sX,z2=y*sX+z1*cX,f=1/(1-z2*.18),dp=(z2+1.1)/2.2;
+   PX[i]=cx+x1*R*f;PY[i]=cy+y2*R*f;PA[i]=(.22+.78*dp*dp)*BR[i]*al;PS[i]=(.65+SZ[i]*1.0)*(.75+.55*dp)}
+  g.globalCompositeOperation="lighter";const pal=act?WARM:COOL;
+  for(let c=0;c<3;c++){g.fillStyle=pal[c];for(let i=0;i<N;i++){if(CB[i]!==c)continue;const s=PS[i];g.globalAlpha=PA[i];g.fillRect(PX[i]-s/2,PY[i]-s/2,s,s)}}
+  g.globalAlpha=1;g.globalCompositeOperation="source-over"}
+ requestAnimationFrame(frame)})();
 function VEL(){try{return({gemini:"Gemini",azure:"Azure",browser:"기본"})[engOf("ko-KR")]+" "+rate().toFixed(2)+"배"}catch(_){return"기본"}}
 function hud(){try{const d=new Date(),n=timers.filter(x=>x.end>Date.now()).length,ev=EV().filter(e=>dd(e.d)===0).length,sub=[n?"타이머 "+n+"개":"",ev?"오늘 일정 "+ev+"개":"","음성 "+VEL()].filter(Boolean).join("\n");
  const c=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"),dt=d.toLocaleDateString("ko-KR",{month:"long",day:"numeric",weekday:"short"});
@@ -1466,6 +1476,6 @@ function hud(){try{const d=new Date(),n=timers.filter(x=>x.end>Date.now()).lengt
 setInterval(hud,1000);hud();
 const STT={off:"청취 꺼짐",listen:"듣고 있습니다",think:"처리 중",speak:"응답 중",act:"말씀하세요"};
 function setSt(){try{const B=document.body,st=!wake?"off":busy?"think":talking()?"speak":"listen",a=wake&&act&&st==="listen"?"1":"0",tx=a==="1"?STT.act:STT[st];
- if(B.dataset.st!==st)B.dataset.st=st;if(B.dataset.act!==a)B.dataset.act=a;if($("stt").textContent!==tx)$("stt").textContent=tx;if($("hSt").textContent!==tx)$("hSt").textContent=tx}catch(_){}}
+ if(st!=="speak"){if(!capOff)capOff=Date.now();else if(Date.now()-capOff>1500)capClr()}else capOff=0;if(B.dataset.st!==st)B.dataset.st=st;if(B.dataset.act!==a)B.dataset.act=a;if($("stt").textContent!==tx)$("stt").textContent=tx;if($("hSt").textContent!==tx)$("hSt").textContent=tx}catch(_){}}
 setInterval(setSt,250);setSt();
 </script></body></html>
