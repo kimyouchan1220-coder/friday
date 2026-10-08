@@ -380,7 +380,8 @@ def main():
     out = WinOut() if sys.platform == "win32" else LogOut()
     ensure_model()
     opts = vision.HandLandmarkerOptions(
-        base_options=BaseOptions(model_asset_path=MODEL_PATH),
+        # 경로 대신 내용을 넘김: MediaPipe 내부 엔진은 Windows에서 한글이 들어간 경로(예: OneDrive\바탕 화면)를 열지 못함
+        base_options=BaseOptions(model_asset_buffer=open(MODEL_PATH, "rb").read()),
         running_mode=vision.RunningMode.VIDEO,
         num_hands=1,
         min_hand_detection_confidence=0.6,
