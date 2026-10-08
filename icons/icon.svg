@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+ <defs>
+  <radialGradient id="bg" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#3a0a10"/><stop offset=".55" stop-color="#16050a"/><stop offset="1" stop-color="#050203"/></radialGradient>
+  <linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e2353f"/><stop offset=".55" stop-color="#a3121c"/><stop offset="1" stop-color="#5e070e"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe29a"/><stop offset=".5" stop-color="#f2b233"/><stop offset="1" stop-color="#b9760f"/></linearGradient>
+  <radialGradient id="core" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#d9fbff"/><stop offset=".7" stop-color="#5fd8ff" stop-opacity=".85"/><stop offset="1" stop-color="#1d8fff" stop-opacity="0"/></radialGradient>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ </defs>
+ <!-- 바탕(마스크용 전체 채움) -->
+ <rect id="bgrect" width="512" height="512" rx="0" fill="url(#bg)"/>
+ <!-- 붉은 장갑판 원 -->
+ <circle cx="256" cy="256" r="214" fill="url(#red)"/>
+ <circle cx="256" cy="256" r="214" fill="none" stroke="#ff6b6b" stroke-opacity=".35" stroke-width="3"/>
+ <!-- 금색 링과 눈금 -->
+ <circle cx="256" cy="256" r="178" fill="#120406"/>
+ <circle cx="256" cy="256" r="178" fill="none" stroke="url(#gold)" stroke-width="14"/>
+ <g stroke="#ffd36b" stroke-width="5" stroke-linecap="round" opacity=".9">
+  <path d="M256 92v22M256 398v22M92 256h22M398 256h22"/>
+ </g>
+ <!-- 청록 HUD 원호 -->
+ <g fill="none" stroke="#6fe3ff" stroke-linecap="round" filter="url(#soft)">
+  <path d="M256 128a128 128 0 0 1 110.9 64" stroke-width="7"/>
+  <path d="M366.9 320a128 128 0 0 1-110.9 64" stroke-width="7" opacity=".75"/>
+  <path d="M145.1 320a128 128 0 0 1 0-128" stroke-width="7" opacity=".55"/>
+  <circle cx="256" cy="256" r="146" stroke-width="2" stroke-dasharray="3 9" opacity=".7"/>
+ </g>
+ <!-- 빛나는 중심 -->
+ <circle cx="256" cy="256" r="104" fill="url(#core)" filter="url(#glow)" opacity=".95"/>
+ <circle cx="256" cy="256" r="76" fill="#0a1a2a" fill-opacity=".55"/>
+ <!-- F 문자(금색 각진 글자) -->
+ <g filter="url(#soft)">
+  <path d="M220 196h86l-10 22h-50v24h42l-10 22h-32v52h-26z" fill="url(#gold)" stroke="#fff3c8" stroke-width="2" stroke-linejoin="round"/>
+ </g>
+</svg>
