@@ -1612,12 +1612,17 @@ const WINAPP={
  clock:{n:"알람 및 시계 앱",u:"ms-clock:",k:/^(시계|알람)\s*앱/},
  camera:{n:"카메라 앱",u:"microsoft.windows.camera:",k:/^카메라\s*앱/}};
 function winLaunch(u){const a=document.createElement("a");a.href=u;a.style.display="none";document.body.append(a);try{a.click()}finally{a.remove()}}
-// 크롬은 클릭·키 입력 직후에만 외부 앱을 열어 줌. 음성 요청처럼 직전 입력이 없으면 답변 아래에 여는 버튼을 붙임
+// 먼저 바로 열기를 시도. 앱이 열리면 브라우저 창이 포커스를 잃음(blur) → 성공으로 봄.
+// 크롬은 외부 앱 실행 후 다음 클릭·키 입력 전까지 추가 실행을 막음(Chromium external_protocol_handler의 g_accept_requests).
+// 3초 안에 열리지 않으면 답변 아래에 여는 버튼을 붙임
 function winOpen(key,quiet){const A=WINAPP[key];if(!A)return"";if(!isWin())return quiet?"":A.n+"은 Windows 노트북에서만 열 수 있습니다.";
  const u=typeof A.u==="function"?A.u():A.u;
- setTimeout(()=>{const live=navigator.userActivation?navigator.userActivation.isActive:false;
-  if(live){winLaunch(u);$("hr").textContent=A.n+"을 열었습니다. 처음에는 크롬이 허용을 묻습니다(‘항상 허용’ 체크 권장)"}
-  else{const els=$("log").querySelectorAll(".m.f"),e=els[els.length-1];if(!e)return;const b=mkBtn(A.n+" 열기",()=>winLaunch(u));b.style.cssText="display:block;margin-top:8px;padding:6px 14px;border:1px solid currentColor;background:transparent;color:inherit;border-radius:6px;cursor:pointer";e.append(b)}},0);
+ setTimeout(()=>{let ok=false;const onb=()=>{ok=true};window.addEventListener("blur",onb);
+  try{winLaunch(u)}catch(_){}
+  setTimeout(()=>{window.removeEventListener("blur",onb);if(ok||document.hidden){$("hr").textContent=A.n+"을 열었습니다";return}
+   const els=$("log").querySelectorAll(".m.f"),e=els[els.length-1];if(!e||e.querySelector(".wbtn"))return;
+   const b=mkBtn(A.n+" 열기",()=>winLaunch(u),"wbtn");b.style.cssText="display:block;margin-top:8px;padding:6px 14px;border:1px solid currentColor;background:transparent;color:inherit;border-radius:6px;cursor:pointer";e.append(b);
+   $("hr").textContent="크롬이 바로 열기를 막았습니다. 버튼을 누르거나, 처음이면 크롬 허용 창에서 ‘항상 허용’을 체크하세요"},3000)},0);
  return quiet?"":A.n+"을 엽니다."}
 function winCmd(t){if(/(뭐야|뭔데|뜻|설명\s*해)/.test(t))return null;
  if(/^날씨\s*앱\s*자동/.test(t)){if(/(꺼|끄|해제|그만)/.test(t)){L.f_wxapp="0";return"날씨를 물어도 날씨 앱은 열지 않겠습니다."}if(/(켜|시작|활성)/.test(t)){L.f_wxapp="1";return"날씨를 물으면 날씨 앱도 함께 열겠습니다."}return"날씨 앱 자동 열기는 "+(L.f_wxapp==="0"?"꺼져":"켜져")+" 있습니다."}
