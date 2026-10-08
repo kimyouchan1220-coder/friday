@@ -1519,7 +1519,9 @@ async function gsOn(){
  GSL=true;gsBtn();let st=null;
  try{
   try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false})}
-  catch(e){const n=e&&e.name;return n==="NotAllowedError"?"카메라 권한이 거부되었습니다. 주소창 왼쪽 아이콘에서 카메라를 허용한 뒤 다시 말씀하세요.":n==="NotFoundError"?"카메라를 찾지 못했습니다.":"카메라를 켜지 못했습니다: "+((e&&e.message)||n)}
+  catch(e){let n=e&&e.name;
+   if(n==="NotReadableError"||n==="OverconstrainedError"||n==="AbortError"){try{await new Promise(r=>setTimeout(r,600));st=await navigator.mediaDevices.getUserMedia({video:true,audio:false});n=""}catch(e2){n=(e2&&e2.name)||n;e=e2}}
+   if(!st)return n==="NotAllowedError"?"카메라 권한이 거부되었습니다. 주소창 왼쪽 아이콘에서 카메라를 허용한 뒤 다시 말씀하세요.":n==="NotFoundError"?"카메라를 찾지 못했습니다.":n==="NotReadableError"?"카메라가 다른 프로그램에서 사용 중이라 켜지 못했습니다. 손짓 제어 프로그램(friday_gesture), 화상회의, Windows 카메라 앱, 다른 브라우저 탭을 닫고 다시 시도하세요. 계속 안 되면 Windows 설정 > 개인 정보 > 카메라에서 데스크톱 앱 카메라 접근이 켜져 있는지 확인하세요.":"카메라를 켜지 못했습니다: "+((e&&e.message)||n)}
   let lm=null,dg="CPU";
   try{GSLIB=GSLIB||await import(MPB+"/vision_bundle.mjs");const fs=GSFS=GSFS||await GSLIB.FilesetResolver.forVisionTasks(MPB+"/wasm");
    for(const d of["GPU","CPU"]){try{lm=await gsMake(fs,d);dg=d;break}catch(e){if(d==="CPU")throw e}}}
