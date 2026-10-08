@@ -1120,7 +1120,7 @@ function wavBlob(ab){const n=ab.length,c=ab.getChannelData(0),sr=ab.sampleRate,b
  for(let i=0;i<n;i++)dv.setInt16(44+i*2,Math.max(-1,Math.min(1,c[i]))*32767,true);return new Blob([buf],{type:"audio/wav"})}
 function playBuf(ab,gen){return new Promise(res=>{if(gen!==TGEN)return res();let url=null;try{url=URL.createObjectURL(wavBlob(ab));const a=new Audio(url);a.preservesPitch=true;a.mozPreservesPitch=true;a.webkitPreservesPitch=true;a.playbackRate=rate();
  let an=null;try{const c=getCtx();if(c.state==="running"){const s=c.createMediaElementSource(a);an=c.createAnalyser();an.fftSize=512;an.smoothingTimeConstant=.5;s.connect(an);an.connect(c.destination);ANA=an}}catch(_){an=null}
- const h={stop(){if(an&&ANA===an)ANA=null;a.onended=null;a.onerror=null;try{a.pause()}catch(_){}try{URL.revokeObjectURL(url)}catch(_){}}},done=()=>{if(an&&ANA===an)ANA=null;if(AXS===h)AXS=null;try{URL.revokeObjectURL(url)}catch(_){}res()};
+ const h={stop(){if(an&&ANA===an)ANA=null;a.onended=null;a.onerror=null;try{a.pause()}catch(_){}try{URL.revokeObjectURL(url)}catch(_){}res()}},done=()=>{if(an&&ANA===an)ANA=null;if(AXS===h)AXS=null;try{URL.revokeObjectURL(url)}catch(_){}res()};
  a.onended=done;a.onerror=done;AXS=h;pauseL();a.onplaying=latAud;a.play().catch(done)}catch(_){res()}})}
 function browserSay(t,lg,gen){return new Promise(res=>{if(gen!==TGEN)return res();const u=new SpeechSynthesisUtterance(t);u.lang=lg;const v=/^ko/i.test(lg)?V.find(x=>x.name===(L.f_v||$("v").value)):pickV(lg);if(v)u.voice=v;u.rate=rate();u.onend=u.onerror=()=>res();capSet(t);pauseL();speechSynthesis.speak(u)})}
 async function decodeAudio(b64,mime){const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const c=getCtx();
@@ -1157,7 +1157,7 @@ function say(t,lg){return new Promise(res=>{if(!speak||!t)return res();cancelSpe
 function mkSpeaker(){let buf="",n=0,fin=false,st=false,cnt=0,gen=0,chain=Promise.resolve(),res,p=new Promise(r=>res=r);
  const lg0=()=>SPL||"ko-KR";
  const chk=()=>{if(fin&&n<=0){n=0;res();if(wake)setTimeout(listen,400)}};
- const out=t=>{t=t.replace(/[*#`_>~]/g,"").trim();if(!t)return;if(!st){st=true;cancelSpeech();pauseL();gen=TGEN}cnt++;const lg=lg0();
+ const out=t=>{t=t.replace(/[*#`_>~]/g,"").trim();if(!t)return;if(!st){st=true;cancelSpeech();pauseL();gen=TGEN}else if(gen!==TGEN)return;cnt++;const lg=lg0();
   if(engOf(lg)!=="browser"){n++;RPL++;const pf=ttsFetch(t,lg);pf.catch(()=>{});
    chain=chain.then(async()=>{try{if(gen!==TGEN)return;let ab;try{ab=await pf;if(!(await ctxReady()))throw new Error("오디오 재생이 차단되었습니다. 화면을 한 번 눌러 주세요")}catch(e){vNote(e);await browserSay(t,lg,gen);return}capSet(t);await playBuf(ab,gen)}finally{n--;if(gen===TGEN)RPL=Math.max(0,RPL-1);chk()}});return}
   const u=new SpeechSynthesisUtterance(t);u.lang=lg;const v=/^ko/i.test(lg)?V.find(x=>x.name===(L.f_v||$("v").value)):pickV(lg);if(v)u.voice=v;u.rate=rate();
@@ -1372,7 +1372,7 @@ function listen(){if(!wake||ar||talking())return;
  ar.onend=()=>{ar=null;setTimeout(listen,rd);rd=300};
  try{ar.start()}catch(_){}}
 async function say2(t){add("f",t);await say(t,"ko-KR")}
-async function heard(al){if(busy)return;let t=al[0];
+async function heard(al,k){if(busy){if(Date.now()-HUSHAT<4000&&(k||0)<20)setTimeout(()=>heard(al,(k||0)+1),200);return}let t=al[0];
  if(!act){const f=al.find(x=>WR.test(x));if(!f)return;t=f;const m=t.match(WR);act=true;
   const rest=t.slice(m.index+m[0].length).replace(/^[\s,.!?]*(야(?=[\s,.!?]|$))?[\s,.!?]*/,"");
   if(rest)return cmd(rest);if(engOf("ko-KR")!=="browser"){beep();$("hr").textContent="말씀하세요";arm();return}await say2(wakeAck());arm();return}
@@ -1536,9 +1536,13 @@ function gsHold(ps,t,x,y,p){const G=GS;
  if(ps==="open"&&!talking())return;
  G.done=true;G.cd=t;gsGest(ps)}
 function gsGest(g){const hr=$("hr");
- if(g==="open"){cancelSpeech();hr.textContent="손바닥: 응답을 멈췄습니다";return}
+ if(g==="open"){hush();hr.textContent="손바닥: 응답을 멈췄습니다. 이어서 말씀하세요";return}
  if(g==="up"||g==="down"){if(busy)return;if(!pend){hr.textContent="엄지: 지금은 확인할 항목이 없습니다";return}hr.textContent=g==="up"?"엄지척: 확인":"엄지 내림: 취소";ask(g==="up"?"확인":"취소");return}
  if(g==="point")gsListen("검지")}
+// 말 끊기: 음성 멈춤, 진행 중인 답변 생성 중단, 호출어 없이 바로 다음 말을 듣도록 듣기 재개
+let HUSHAT=0,HUSHT=0;
+function hush(){HUSHAT=Date.now();cancelSpeech();try{if(ctl)ctl.abort()}catch(_){}
+ if(wake){act=true;arm();clearTimeout(HUSHT);const go=(n)=>{if(ar||!wake)return;if(talking()&&n<10){HUSHT=setTimeout(()=>go(n+1),150);return}listen()};HUSHT=setTimeout(()=>go(0),250)}}
 function gsListen(lb){const hr=$("hr");if(busy||talking())return;if(wake){act=true;arm();beep();hr.textContent=lb+": 말씀하세요"}else if(!rec){$("mic").click();hr.textContent=lb+": 듣고 있습니다"}}
 function handCenter(p){let x=0,y=0;[0,5,9,13,17].forEach(i=>{x+=p[i].x;y+=p[i].y});return[1-x/5,y/5]}
 function gsAct(dir){
