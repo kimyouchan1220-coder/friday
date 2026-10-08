@@ -267,7 +267,7 @@ let timers=[],pend=null;
 const fmt=n=>{const h=Math.floor(n/3600),m=Math.floor(n%3600/60),x=n%60;return[h?h+"시간":"",m?m+"분":"",x?x+"초":""].filter(Boolean).join(" ")||"0초"};
 const nowStr=()=>new Date().toLocaleString("ko-KR",{dateStyle:"full",timeStyle:"short"});
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},600)}catch(_){}}
-const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색) 13) 지원 관리 (예: 지원 추가 부산항만공사 마감 10월 20일, 지원 현황, 지원 1번 면접, 마감 임박) 14) 지출 기록 (예: 점심 8천원 썼어, 이번 달 지출, 지출 취소) 15) 보유 종목과 포트폴리오 점검 (예: 보유 추가 엔비디아 10주 평단 120달러, 보유 목록, 포트폴리오 점검) 16) 종목 데이터 분석 (예: 엔비디아 분석해줘) 17) 백업과 복원 (예: 백업, 복원) 18) 기억 (예: 기억해 줘 나는 부산에 산다, 기억 목록, 기억 삭제 1번) 19) 이미지나 PDF 분석 (화면에 끌어놓거나 붙여넣고 질문) 20) 번역과 통역 (예: 안녕하세요를 일본어로 말해줘, 영어 통역 모드, 통역 끝) 21) 단위와 시간대 (예: 10마일은 킬로미터로, 화씨 100도는 섭씨로, 뉴욕 지금 몇 시, 서울 오후 3시는 런던 몇 시) 22) 일정과 디데이 (예: 일정 추가 10월 20일 오후 2시 면접, 오늘 일정, 면접까지 며칠, 매일 오전 9시에 약 먹으라고 알려줘, 반복 알림 목록) 23) 루틴 타이머 (예: 뽀모도로 시작, 운동 타이머 30초 운동 10초 휴식 8세트, 명상 5분) 24) 길찾기와 근처 검색 (예: 서울역에서 부산역 가는 길, 근처 카페 찾아줘) 25) 음악과 영상 링크 (예: 아이유 노래 틀어줘) 26) 레시피 (예: 김치찌개 레시피, 시작, 다음) 27) 퀴즈와 오답 노트 (예: 영어 단어 퀴즈 내줘, 오답 노트 퀴즈) 28) 모드 (예: 토론 연습 모드, 면접 연습 모드, 영어 회화 모드, 모드 해제) 29) 사전, 맞춤법 교정, 요약, 메일 초안, 아이디어 (그냥 말하면 됩니다) 30) 말투 (예: 자비스처럼 말해줘, 영화 말투로, 기본 말투로) 31) 말하는 속도 (예: 좀 더 천천히 말해줘, 속도 1.3배, 속도 기본으로) 32) 음성 (예: 고품질 음성 켜줘, 남자 목소리로 바꿔줘, 목소리 목록, 기본 음성으로 돌려줘) 33) 호칭 (예: 내 이름은 유찬이야, 나를 유찬님이라고 불러줘) 34) 투자 원칙서 (예: 원칙 추가 한 종목 비중 20퍼센트 이하, 원칙 목록, 원칙 2번 삭제, 원칙 예시) 35) 결정 일지 (예: 일지 기록 엔비디아 매수 10주 이유 데이터센터 수요, 일지 목록, 복기해줘) 36) 접속 인사 (예: 인사 꺼줘, 인사 켜줘). 왼쪽 사이드바에서 대화 목록, 검색, 빠른 실행, 내보내기를 쓸 수 있습니다. 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다. 37) 포트폴리오 연동(가져오기 후): 자산 현황, 원칙 점검, 리밸런싱, 이번 달 적립, 배당 얼마, 엔비디아 차트 1개월, 시장 요인 판단, 실적 일정. 시세는 종가 기준이고 Alpha Vantage 키가 필요합니다. 38) 오늘 정리 (예: 오늘 정리해줘: 일정·할 일·지원·지출·적립을 한 번에 점검) 39) 투자 기록 (예: 이번 달 적립 50만원 했어, KO 배당 3.2달러 들어왔어, 투자 기록) 40) 지원 단계 (예: 지원 1번 면접 10월 20일 오후 2시, 지원 일정) 41) 예산 (예: 월 예산 120만원, 예산 식비 30만원, 예산 현황) 42) 구글 캘린더 (예: 구글 클라이언트 ID 설정 ..., 구글 캘린더 연결, 구글 캘린더 일정 보여줘, 구글 캘린더 동기화 켜줘) 43) 손동작 (예: 손동작 켜줘, 손동작 꺼줘: 손바닥 좌우 손짓은 대화 넘기기, 말하는 중 손바닥 정지는 응답 중지, 검지 세우기는 듣기 시작, 엄지척은 확인, 엄지 내림은 취소, V자 유지는 위로 스크롤, V에서 검지·중지 한 마디 접기는 아래로 스크롤. 영상은 기기 안에서만 처리) 44) 카메라 비서 (손동작이 켜져 있을 때: 1분 넘게 자리를 비우면 음성 대기를 멈추고 돌아오면 그동안 온 알림 정리, 2분 넘게 자세가 무너지면 경고, 손바닥 작게 흔들기는 듣기 시작. 예: 자세 기준 설정, 내 자세 어때, 자세 알림 꺼줘, 자리 감지 꺼줘).";
+const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색) 13) 지원 관리 (예: 지원 추가 부산항만공사 마감 10월 20일, 지원 현황, 지원 1번 면접, 마감 임박) 14) 지출 기록 (예: 점심 8천원 썼어, 이번 달 지출, 지출 취소) 15) 보유 종목과 포트폴리오 점검 (예: 보유 추가 엔비디아 10주 평단 120달러, 보유 목록, 포트폴리오 점검) 16) 종목 데이터 분석 (예: 엔비디아 분석해줘) 17) 백업과 복원 (예: 백업, 복원) 18) 기억 (예: 기억해 줘 나는 부산에 산다, 기억 목록, 기억 삭제 1번) 19) 이미지나 PDF 분석 (화면에 끌어놓거나 붙여넣고 질문) 20) 번역과 통역 (예: 안녕하세요를 일본어로 말해줘, 영어 통역 모드, 통역 끝) 21) 단위와 시간대 (예: 10마일은 킬로미터로, 화씨 100도는 섭씨로, 뉴욕 지금 몇 시, 서울 오후 3시는 런던 몇 시) 22) 일정과 디데이 (예: 일정 추가 10월 20일 오후 2시 면접, 오늘 일정, 면접까지 며칠, 매일 오전 9시에 약 먹으라고 알려줘, 반복 알림 목록) 23) 루틴 타이머 (예: 뽀모도로 시작, 운동 타이머 30초 운동 10초 휴식 8세트, 명상 5분) 24) 길찾기와 근처 검색 (예: 서울역에서 부산역 가는 길, 근처 카페 찾아줘) 25) 음악과 영상 링크 (예: 아이유 노래 틀어줘) 26) 레시피 (예: 김치찌개 레시피, 시작, 다음) 27) 퀴즈와 오답 노트 (예: 영어 단어 퀴즈 내줘, 오답 노트 퀴즈) 28) 모드 (예: 토론 연습 모드, 면접 연습 모드, 영어 회화 모드, 모드 해제) 29) 사전, 맞춤법 교정, 요약, 메일 초안, 아이디어 (그냥 말하면 됩니다) 30) 말투 (예: 자비스처럼 말해줘, 영화 말투로, 기본 말투로) 31) 말하는 속도 (예: 좀 더 천천히 말해줘, 속도 1.3배, 속도 기본으로) 32) 음성 (예: 고품질 음성 켜줘, 남자 목소리로 바꿔줘, 목소리 목록, 기본 음성으로 돌려줘) 33) 호칭 (예: 내 이름은 유찬이야, 나를 유찬님이라고 불러줘) 34) 투자 원칙서 (예: 원칙 추가 한 종목 비중 20퍼센트 이하, 원칙 목록, 원칙 2번 삭제, 원칙 예시) 35) 결정 일지 (예: 일지 기록 엔비디아 매수 10주 이유 데이터센터 수요, 일지 목록, 복기해줘) 36) 접속 인사 (예: 인사 꺼줘, 인사 켜줘). 왼쪽 사이드바에서 대화 목록, 검색, 빠른 실행, 내보내기를 쓸 수 있습니다. 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다. 37) 포트폴리오 연동(가져오기 후): 자산 현황, 원칙 점검, 리밸런싱, 이번 달 적립, 배당 얼마, 엔비디아 차트 1개월, 시장 요인 판단, 실적 일정. 시세는 종가 기준이고 Alpha Vantage 키가 필요합니다. 38) 오늘 정리 (예: 오늘 정리해줘: 일정·할 일·지원·지출·적립을 한 번에 점검) 39) 투자 기록 (예: 이번 달 적립 50만원 했어, KO 배당 3.2달러 들어왔어, 투자 기록) 40) 지원 단계 (예: 지원 1번 면접 10월 20일 오후 2시, 지원 일정) 41) 예산 (예: 월 예산 120만원, 예산 식비 30만원, 예산 현황) 42) 구글 캘린더 (예: 구글 클라이언트 ID 설정 ..., 구글 캘린더 연결, 구글 캘린더 일정 보여줘, 구글 캘린더 동기화 켜줘) 43) 손동작 (예: 손동작 켜줘, 손동작 꺼줘: 손바닥 좌우 손짓은 대화 넘기기, 말하는 중 손바닥 정지는 응답 중지, 검지 세우기는 듣기 시작, 엄지척은 확인, 엄지 내림은 취소, V자 유지는 위로 스크롤, V에서 검지·중지 한 마디 접기는 아래로 스크롤. 영상은 기기 안에서만 처리) 44) 카메라 비서 (손동작이 켜져 있을 때: 1분 넘게 자리를 비우면 음성 대기를 멈추고 돌아오면 그동안 온 알림 정리, 2분 넘게 자세가 무너지면 경고, 손바닥 작게 흔들기는 듣기 시작. 예: 자세 기준 설정, 내 자세 어때, 자세 알림 꺼줘, 자리 감지 꺼줘) 45) Windows 앱 열기 (Windows 노트북에서: 날씨를 물으면 날씨 앱도 열림, 날씨 앱 열어줘, 윈도우 설정 열어줘, 와이파이 설정 열어줘, 블루투스 열어줘, 카메라 권한 열어줘, 계산기 열어줘, 스토어 열어줘. 처음에 크롬이 허용을 물음. 날씨 앱 자동 열기 꺼줘).";
 const LIST=(a,e)=>a.length?a.map((x,i)=>(i+1)+"번 "+x).join(". "):e;
 const CITY={"서울":[37.5665,126.978],"부산":[35.1796,129.0756],"인천":[37.4563,126.7052],"대구":[35.8714,128.6014],"대전":[36.3504,127.3845],"광주":[35.1595,126.8526],"울산":[35.5384,129.3114],"세종":[36.48,127.289],"수원":[37.2636,127.0286],"창원":[35.228,128.6811],"제주":[33.4996,126.5312],"포항":[36.019,129.3435],"김해":[35.2285,128.8894],"성남":[37.42,127.1267],"고양":[37.6584,126.832],"용인":[37.2411,127.1776],"청주":[36.6424,127.489],"전주":[35.8242,127.148],"천안":[36.8151,127.1139],"여수":[34.7604,127.6622],"춘천":[37.8813,127.7298],"강릉":[37.7519,128.8761]};
 const WX={0:"맑음",1:"대체로 맑음",2:"구름 조금",3:"흐림",45:"안개",48:"안개",51:"약한 이슬비",53:"이슬비",55:"강한 이슬비",56:"어는 이슬비",57:"어는 이슬비",61:"약한 비",63:"비",65:"강한 비",66:"어는 비",67:"어는 비",71:"약한 눈",73:"눈",75:"강한 눈",77:"싸락눈",80:"약한 소나기",81:"소나기",82:"강한 소나기",85:"눈 소나기",86:"강한 눈 소나기",95:"뇌우",96:"우박 동반 뇌우",99:"강한 우박 동반 뇌우"};
@@ -280,7 +280,7 @@ async function weather(city,day){
   if(city){p=await geo(city);if(!p)return city+" 지역을 찾지 못했습니다."}
   else if(L.f_city){p=await geo(L.f_city);if(!p)return"기본 도시를 찾지 못했습니다. 도시 설정 부산처럼 다시 말씀해 주세요."}
   else{try{p=await gps()}catch(_){return"위치를 알 수 없습니다. 도시 설정 부산처럼 말씀해 주세요."}}
-  const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+p.lat+"&longitude="+p.lon+"&current=temperature_2m,apparent_temperature,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2"),j=await r.json();
+  WXP=p;const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+p.lat+"&longitude="+p.lon+"&current=temperature_2m,apparent_temperature,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2"),j=await r.json();
   const d=j.daily,c=j.current;if(!d||!c)return"날씨 정보를 받지 못했습니다.";
   const rn=x=>Math.round(x),pr=d.precipitation_probability_max[day],cond=WX[d.weather_code[day]]||"정보 없음";
   const s=(day?p.name+" 내일 ":p.name+" 현재 "+rn(c.temperature_2m)+"도, 체감 "+rn(c.apparent_temperature)+"도, "+(WX[c.weather_code]||"")+". 오늘 ")+(day?cond+", ":"")+"최저 "+rn(d.temperature_2m_min[day])+"도, 최고 "+rn(d.temperature_2m_max[day])+"도"+(pr!=null?", 강수확률 "+pr+"퍼센트":"")+"."+(pr>=50?" 우산을 챙기세요.":"");
@@ -1059,7 +1059,7 @@ function ext(t){
  if(QZ)return quizTurn(t);
  if(TR){if(/^통역\s*(모드\s*)?(끝|종료|그만|꺼|해제|중지)/.test(t))return(TR=null,"통역 모드를 종료했습니다.");return trans(t,TR.c,TR.n)}
  if(RC){const r=recipeTurn(t);if(r!==null)return r}
- {const g=gsCmd(t)||camCmd(t);if(g)return g}
+ {const g=gsCmd(t)||camCmd(t)||winCmd(t);if(g)return g}
  let m;
  if(/통역/.test(t)&&/(모드|시작|켜)/.test(t)&&!/(끝|종료|그만|해제)/.test(t)&&!/(번역|말해)/.test(t)){const lm=t.match(new RegExp("("+LNR+")"));if(!lm)return"어느 언어로 통역할까요? 예: 영어 통역 모드";clr();TR={c:LNG[lm[1]],n:lm[1]};return lm[1]+" 통역 모드입니다. 말씀하시는 내용을 "+lm[1]+"로 번역해 읽어 드립니다. 이 동안 모든 말이 번역됩니다. 끝내려면 통역 끝이라고 말씀하세요."}
  if(/통역\s*(모드\s*)?(끝|종료|그만|해제)/.test(t))return"켜져 있는 통역 모드가 없습니다.";
@@ -1236,7 +1236,7 @@ function local(t){t=t.trim().replace(/[.!?]+$/,"");
  if(/^(데이터\s*)?(백업|내보내기)(해\s*줘|해줘|해)?$/.test(t)||/^데이터\s*백업/.test(t)){backupLink();return"백업 링크를 화면에 표시했습니다. 눌러서 저장하세요."}
  if(/^(데이터\s*)?(복원|가져오기|백업\s*복원)(해\s*줘|해줘|해)?$/.test(t)){restoreUI();return"복원할 백업 파일을 화면에서 선택하세요."}
  let cm=t.match(/^도시\s*(?:설정|등록|변경)\s*(.+)$/);if(cm){L.f_city=cm[1].trim();return"기본 도시를 "+L.f_city+"(으)로 설정했습니다."}
- if(/(날씨|기온|우산)/.test(t)&&!/^(메모|할\s*일)/.test(t)){const m3=t.match(/([가-힣]{2,8})\s*(?:의\s*)?(?:날씨|기온)/),cty=m3&&!/^(오늘|내일|지금|현재|이번|요즘|오늘의|내일의)$/.test(m3[1])?m3[1]:"";return weather(cty,/내일/.test(t)?1:0)}
+ if(/(날씨|기온|우산)/.test(t)&&!/^(메모|할\s*일)/.test(t)){const m3=t.match(/([가-힣]{2,8})\s*(?:의\s*)?(?:날씨|기온)/),cty=m3&&!/^(오늘|내일|지금|현재|이번|요즘|오늘의|내일의)$/.test(m3[1])?m3[1]:"";return weather(cty,/내일/.test(t)?1:0).then(s=>{if(L.f_wxapp!=="0"&&!/(못했|알 수 없|찾지)/.test(s))winOpen("weather",true);return s})}
  if(/환율|(\d[\d,.]*)\s*달러.*(원|얼마)/.test(t)&&!/(주가|시세)/.test(t))return fxSay(t);
  const ab=!/뒤|(?<!오)후/.test(t)&&!/메모|할\s*일/.test(t)&&/(알려|알림|알람|깨워)/.test(t)&&t.match(/(오전|오후|아침|저녁|밤|새벽)?\s*(\d{1,2})\s*시(?!간)\s*(?:(\d{1,2})\s*분|(반))?/);
  if(ab){const h=+ab[2],mi=ab[4]?30:(+ab[3]||0);if(h>24||mi>59)return"시각을 알아듣지 못했습니다.";
@@ -1478,7 +1478,7 @@ function capSet(t){try{const e=$("cap");if(!e)return;clearTimeout(capTm);t=Strin
  requestAnimationFrame(frame)})();
 /* ===== 손동작 인식: 카메라로 손을 추적해 좌우 손짓으로 대화를 넘기고 구체를 기울임 ===== */
 // 인식 라이브러리는 외부 CDN 대신 이 사이트에 직접 올린 사본(npm 무결성 확인)을 씀. 모델 파일은 실행 코드가 아닌 데이터라 구글 공식 저장소에서 받음
-const MPB=new URL("vendor/tasks-vision-1.1.0",location.href).href,MPP="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",MPM="https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task";
+const MPB=(()=>{try{return new URL("vendor/tasks-vision-1.1.0",location.href).href}catch(_){return"vendor/tasks-vision-1.1.0"}})(),MPP="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",MPM="https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task";
 let GS=null,GSL=false,GSLIB=null,GSFS=null;
 const GSHELP="손바닥 좌우 손짓은 대화 넘기기, 말하는 중 손바닥을 0.5초 멈추면 응답 중지, 검지를 0.6초 세우면 듣기 시작, 엄지척은 확인, 엄지 내림은 취소, V자를 유지하면 위로, V에서 검지와 중지를 한 마디만 접으면 아래로 스크롤, 손바닥을 좌우로 작게 두세 번 흔들면 듣기 시작입니다.";
 const CAMHELP="카메라가 켜져 있는 동안 자리 비움 감지(1분 넘게 안 보이면 음성 대기를 멈추고, 돌아오면 그동안 온 알림을 정리)와 자세 알림(2분 넘게 자세가 무너지면 경고)도 작동합니다. 바르게 앉아 ‘자세 기준 설정’이라고 하면 기준을 다시 잡고, ‘자리 감지 꺼줘’, ‘자세 알림 꺼줘’로 끌 수 있습니다.";
@@ -1587,6 +1587,42 @@ function camCmd(t){if(/(뭐야|뭔데|뜻|설명\s*해)/.test(t))return null;
  if(/^자세\s*기준/.test(t)){if(!GS)return"먼저 ‘손동작 켜줘’로 카메라를 켜 주세요.";if(!camOpt("post"))L.f_cpost="1";camPose();(GS.po=GS.po||{buf:[],warnT:-1e9}).cal=[];return"바르게 앉은 자세를 4초 동안 유지하세요. 기준을 잡으면 알려 드리겠습니다."}
  if(/^(자세\s*(상태|어때|점검)|내\s*자세)/.test(t)){const s=GS&&GS.po&&GS.po.last;if(!s)return"아직 자세 정보가 없습니다. 카메라에 어깨까지 보이게 앉아 주세요.";
   return"현재 자세는 기준 대비 "+Math.round(s.r/s.B*100)+"%, 어깨 기울기 "+Math.round(s.tilt)+"도입니다. "+(s.bad?"무너진 상태입니다.":"정상 범위입니다.")+" 기준 78% 미만이거나 기울기 12도 초과가 2분 넘게 이어지면 알려 드립니다."}
+ return null}
+/* ===== Windows 앱 열기 =====
+ 지금은 Windows가 공식 등록한 앱 주소(URI)로 엽니다. 나중에 노트북 연결 프로그램을 만들면 winLaunch()만 바꾸면 됩니다.
+ 주소 출처: Microsoft Learn "Launch the default app for a URI"(msnweather, ms-settings, ms-photos, mailto, ms-windows-store).
+ calculator·ms-clock·microsoft.windows.camera는 Microsoft 문서 표에는 없고 Winaero 목록 기준이라 기기에 따라 안 열릴 수 있음 */
+let WXP=null;
+const isWin=()=>/Windows/i.test(navigator.userAgent);
+const WINAPP={
+ weather:{n:"날씨 앱",u:()=>"msnweather://forecast"+(WXP?"?la="+WXP.lat.toFixed(4)+"&lo="+WXP.lon.toFixed(4):""),k:/^날씨\s*(앱|창|화면)/},
+ settings:{n:"Windows 설정",u:"ms-settings:",k:/^(윈도우|windows|컴퓨터|노트북|pc)\s*설정/i},
+ camset:{n:"카메라 권한 설정",u:"ms-settings:privacy-webcam",k:/^카메라\s*(권한|개인\s*정보)/},
+ micset:{n:"마이크 권한 설정",u:"ms-settings:privacy-microphone",k:/^마이크\s*(권한|개인\s*정보)/},
+ wifi:{n:"와이파이 설정",u:"ms-settings:network-wifi",k:/^(와이\s*파이|wi-?fi|인터넷)\s*(설정|창)?/i},
+ bt:{n:"블루투스 설정",u:"ms-settings:bluetooth",k:/^블루\s*투스/},
+ display:{n:"디스플레이 설정",u:"ms-settings:display",k:/^(디스플레이|화면\s*밝기|해상도)/},
+ sound:{n:"소리 설정",u:"ms-settings:sound",k:/^(소리|사운드|스피커)\s*(설정|창)/},
+ update:{n:"Windows 업데이트",u:"ms-settings:windowsupdate",k:/^(윈도우\s*)?업데이트/},
+ battery:{n:"배터리 설정",u:"ms-settings:batterysaver",k:/^배터리/},
+ photos:{n:"사진 앱",u:"ms-photos:",k:/^사진\s*(앱|창)/},
+ mail:{n:"메일 앱",u:"mailto:",k:/^(메일|이메일)\s*(앱|창)/},
+ store:{n:"Microsoft Store",u:"ms-windows-store://home/",k:/^(마이크로소프트\s*)?스토어/},
+ calc:{n:"계산기",u:"calculator:",k:/^계산기/},
+ clock:{n:"알람 및 시계 앱",u:"ms-clock:",k:/^(시계|알람)\s*앱/},
+ camera:{n:"카메라 앱",u:"microsoft.windows.camera:",k:/^카메라\s*앱/}};
+function winLaunch(u){const a=document.createElement("a");a.href=u;a.style.display="none";document.body.append(a);try{a.click()}finally{a.remove()}}
+// 크롬은 클릭·키 입력 직후에만 외부 앱을 열어 줌. 음성 요청처럼 직전 입력이 없으면 답변 아래에 여는 버튼을 붙임
+function winOpen(key,quiet){const A=WINAPP[key];if(!A)return"";if(!isWin())return quiet?"":A.n+"은 Windows 노트북에서만 열 수 있습니다.";
+ const u=typeof A.u==="function"?A.u():A.u;
+ setTimeout(()=>{const live=navigator.userActivation?navigator.userActivation.isActive:false;
+  if(live){winLaunch(u);$("hr").textContent=A.n+"을 열었습니다. 처음에는 크롬이 허용을 묻습니다(‘항상 허용’ 체크 권장)"}
+  else{const els=$("log").querySelectorAll(".m.f"),e=els[els.length-1];if(!e)return;const b=mkBtn(A.n+" 열기",()=>winLaunch(u));b.style.cssText="display:block;margin-top:8px;padding:6px 14px;border:1px solid currentColor;background:transparent;color:inherit;border-radius:6px;cursor:pointer";e.append(b)}},0);
+ return quiet?"":A.n+"을 엽니다."}
+function winCmd(t){if(/(뭐야|뭔데|뜻|설명\s*해)/.test(t))return null;
+ if(/^날씨\s*앱\s*자동/.test(t)){if(/(꺼|끄|해제|그만)/.test(t)){L.f_wxapp="0";return"날씨를 물어도 날씨 앱은 열지 않겠습니다."}if(/(켜|시작|활성)/.test(t)){L.f_wxapp="1";return"날씨를 물으면 날씨 앱도 함께 열겠습니다."}return"날씨 앱 자동 열기는 "+(L.f_wxapp==="0"?"꺼져":"켜져")+" 있습니다."}
+ if(!/(열어|띄워|켜\s*줘|켜|실행|보여\s*줘)/.test(t))return null;
+ for(const k in WINAPP)if(WINAPP[k].k.test(t))return winOpen(k);
  return null}
 function gsBtn(){const b=$("gs");if(b){b.classList.toggle("on",!!GS);b.textContent=GSL?"준비 중":"손동작";b.setAttribute("aria-pressed",GS?"true":"false")}}
 async function gsOn(){
