@@ -25,6 +25,7 @@ import time
 import urllib.request
 
 MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task"
+WIN_TITLE = "Friday gesture (q or X: quit, p: pause)"
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hand_landmarker.task")
 
 # 손바닥 손짓 방향별 단축키. 오른쪽 손짓 = 오른쪽(다음), 왼쪽 손짓 = 왼쪽(이전)
@@ -468,9 +469,14 @@ def main():
                     if now - ctl.msg_t < 1.2 and ("→" in ctl.msg or "←" in ctl.msg):
                         arrow = "-->" if "→" in ctl.msg else "<--"
                         cv2.putText(view, arrow, (w // 2 - 40, h // 2), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3, cv2.LINE_AA)
-                    cv2.imshow("Friday gesture (q: quit, p: pause)", view)
+                    cv2.imshow(WIN_TITLE, view)
                     k = cv2.waitKey(1) & 0xFF
                     if k in (ord("q"), 27):
+                        break
+                    try:  # 미리보기 창의 X를 누르면 종료 (그냥 두면 다음 프레임에 창이 다시 생김)
+                        if cv2.getWindowProperty(WIN_TITLE, cv2.WND_PROP_VISIBLE) < 1:
+                            break
+                    except cv2.error:
                         break
                     if k == ord("p"):
                         ctl.paused = not ctl.paused
