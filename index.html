@@ -1689,7 +1689,10 @@ async function brDo(kind,name,force){
   BRON=true;return j.msg||j.error||(kind==="close"?"종료 요청을 보냈습니다.":"열기 요청을 보냈습니다.")}
  catch(e){BRON=false;return"노트북 연결 프로그램에 닿지 않습니다. start_bridge.bat가 켜져 있는지 확인하세요."}}
 function brCmd0(t){
- let m=t.match(/^(노트북|컴퓨터|pc)\s*연결\s*(?:코드\s*)?(\d{6})/i);
+ // 연결 코드: "노트북 연결 123456", "연결 코드 123 456", "연결 공구구팔이삼"(음성) 모두 인식
+ let m=null;{const kn={"공":"0","영":"0","일":"1","이":"2","삼":"3","사":"4","오":"5","육":"6","륙":"6","칠":"7","팔":"8","구":"9"};
+  const t2=t.replace(/\s*(이야|입니다|이에요|예요|야)\s*[.!]*$/,"");const mm=t2.match(/^(?:(?:노트북|컴퓨터|pc|브릿지|연결\s*프로그램)\s*)?연결\s*(?:코드\s*)?(?:는\s*|은\s*)?([0-9공영일이삼사오육륙칠팔구\s\-]{6,20})(?:이야|입니다|야|이에요|예요)?\s*[.!]*$/i);
+  if(mm){const d=mm[1].replace(/[\s\-]/g,"").replace(/[공영일이삼사오육륙칠팔구]/g,c=>kn[c]);if(/^\d{6}$/.test(d))m=[0,0,d]}}
  if(m)return(async()=>{try{const{st,j}=await brReq("/pair",{code:m[2]});if(st!==200||!j.token)return j.error||"연결 코드가 맞지 않습니다.";L.f_brtok=j.token;await brPing();return"노트북과 연결했습니다. 이제 ‘디스코드 켜줘’, ‘카카오톡 꺼줘’처럼 말하면 됩니다. 앱은 크롬 허용 창 없이 바로 열립니다."}
   catch(e){return"연결 프로그램에 닿지 않습니다. start_bridge.bat를 켜 두었는지, 크롬이 묻는 ‘로컬 네트워크 접근’을 허용했는지 확인하세요."}})();
  if(/^(노트북|컴퓨터|pc)\s*연결\s*(해제|끊어|삭제|지워)/i.test(t)){delete L.f_brtok;BRON=false;return"노트북 연결을 해제했습니다. 이 기기에 저장된 연결 정보를 지웠습니다."}
