@@ -351,6 +351,49 @@ class Controller:
             self.state = pose.upper()
 
 
+def frame_ok(fr):
+    """검은 화면(카메라 가림·차단·가상 카메라)인지 판별: 평균 밝기와 변화량이 거의 0이면 빈 영상"""
+    return fr is not None and fr.size > 0 and (float(fr.mean()) > 6 or float(fr.std()) > 4)
+
+
+def open_camera(cv2, prefer=0):
+    """카메라 번호와 연결 방식을 바꿔 가며 실제 영상이 나오는 카메라를 찾음"""
+    win = sys.platform == "win32"
+    backends = [("DSHOW", cv2.CAP_DSHOW), ("MSMF", cv2.CAP_MSMF)] if win else [("기본", cv2.CAP_ANY)]
+    idxs = [prefer] + [i for i in (0, 1, 2) if i != prefer]
+    opened_black = []
+    for i in idxs:
+        for bname, be in backends:
+            cap = cv2.VideoCapture(i, be)
+            if not cap.isOpened():
+                cap.release()
+                continue
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            good = 0
+            t0 = time.time()
+            while time.time() - t0 < 2.5:  # 카메라가 켜지는 데 1~2초 걸리기도 함
+                ok, fr = cap.read()
+                if ok and frame_ok(fr):
+                    good += 1
+                    if good >= 3:
+                        print(f"카메라 {i}번 ({bname}) 사용")
+                        return cap
+                time.sleep(0.03)
+            opened_black.append(f"{i}번({bname})")
+            cap.release()
+    if opened_black:
+        print("카메라는 열리지만 영상이 검게 나옵니다: " + ", ".join(opened_black))
+        print("확인할 것:")
+        print("  1) Friday 웹의 손동작이 카메라를 쓰고 있지 않은지 (Friday에 '손동작 꺼줘')")
+        print("  2) 노트북 카메라 차단 키(ASUS는 보통 F10 또는 카메라 그림 키)나 렌즈 가림막")
+        print("  3) Windows 설정 > 개인 정보 및 보안 > 카메라 > '데스크톱 앱이 카메라에 액세스하도록 허용' 켜짐")
+        print("  4) 다른 카메라 앱(Windows 카메라, 화상회의)이 켜져 있지 않은지")
+    else:
+        print("카메라를 찾지 못했습니다. 다른 프로그램(Friday 손동작, 화상회의 등)이 쓰고 있을 수 있습니다.")
+    return None
+
+
 def ensure_model():
     if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) > 1_000_000:
         return
@@ -387,12 +430,9 @@ def main():
         min_hand_detection_confidence=0.6,
         min_tracking_confidence=0.6,
     )
-    cap = cv2.VideoCapture(a.camera, cv2.CAP_DSHOW) if sys.platform == "win32" else cv2.VideoCapture(a.camera)
-    if not cap.isOpened():
-        print("카메라를 열지 못했습니다. 다른 프로그램(Friday 손동작, 화상회의 등)이 쓰고 있거나 번호가 다릅니다 (--camera 1 시도).")
+    cap = open_camera(cv2, a.camera)
+    if cap is None:
         return 1
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
     ctl = Controller(out, mode=a.mode, mouse=not a.no_mouse, sens=a.sens, speed=a.speed)
     t0 = time.monotonic()
@@ -415,6 +455,8 @@ def main():
                 ctl.update(now, p)
                 if not a.no_preview:
                     view = cv2.flip(frame, 1)
+                    if not frame_ok(frame):  # 실행 중에 영상이 끊긴 경우(다른 앱이 카메라를 가져감 등)
+                        cv2.putText(view, "NO VIDEO - camera blocked or in use", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (80, 80, 255), 2, cv2.LINE_AA)
                     h, w = view.shape[:2]
                     x0, y0, x1, y1 = ctl.region
                     cv2.rectangle(view, (int(x0 * w), int(y0 * h)), (int(x1 * w), int(y1 * h)), (90, 70, 40), 1)
