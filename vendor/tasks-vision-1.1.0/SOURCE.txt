@@ -1,0 +1,4 @@
+MediaPipe Tasks Vision 1.1.0 (@mediapipe/tasks-vision), Apache-2.0, Google.
+npm 레지스트리 무결성(sha512-ZJqh0wMKOINorfSffvDAxzyO1//c+FiG3IkzOdNDnLqvBB3DbMfj0bB/tys2SNf9S914sgoIbIpF4HTOi336cg==) 확인 후 그대로 복사함.
+외부 CDN 의존을 없애 카메라 권한을 가진 페이지에 제3자 코드가 섞이지 않도록 자체 호스팅.
+파일명 vision_bundle.mjs → vision_bundle.js (내용 동일, GitHub Pages가 .js를 확실히 자바스크립트로 전송하도록).

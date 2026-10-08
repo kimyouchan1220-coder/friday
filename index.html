@@ -267,7 +267,7 @@ let timers=[],pend=null;
 const fmt=n=>{const h=Math.floor(n/3600),m=Math.floor(n%3600/60),x=n%60;return[h?h+"시간":"",m?m+"분":"",x?x+"초":""].filter(Boolean).join(" ")||"0초"};
 const nowStr=()=>new Date().toLocaleString("ko-KR",{dateStyle:"full",timeStyle:"short"});
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},600)}catch(_){}}
-const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색) 13) 지원 관리 (예: 지원 추가 부산항만공사 마감 10월 20일, 지원 현황, 지원 1번 면접, 마감 임박) 14) 지출 기록 (예: 점심 8천원 썼어, 이번 달 지출, 지출 취소) 15) 보유 종목과 포트폴리오 점검 (예: 보유 추가 엔비디아 10주 평단 120달러, 보유 목록, 포트폴리오 점검) 16) 종목 데이터 분석 (예: 엔비디아 분석해줘) 17) 백업과 복원 (예: 백업, 복원) 18) 기억 (예: 기억해 줘 나는 부산에 산다, 기억 목록, 기억 삭제 1번) 19) 이미지나 PDF 분석 (화면에 끌어놓거나 붙여넣고 질문) 20) 번역과 통역 (예: 안녕하세요를 일본어로 말해줘, 영어 통역 모드, 통역 끝) 21) 단위와 시간대 (예: 10마일은 킬로미터로, 화씨 100도는 섭씨로, 뉴욕 지금 몇 시, 서울 오후 3시는 런던 몇 시) 22) 일정과 디데이 (예: 일정 추가 10월 20일 오후 2시 면접, 오늘 일정, 면접까지 며칠, 매일 오전 9시에 약 먹으라고 알려줘, 반복 알림 목록) 23) 루틴 타이머 (예: 뽀모도로 시작, 운동 타이머 30초 운동 10초 휴식 8세트, 명상 5분) 24) 길찾기와 근처 검색 (예: 서울역에서 부산역 가는 길, 근처 카페 찾아줘) 25) 음악과 영상 링크 (예: 아이유 노래 틀어줘) 26) 레시피 (예: 김치찌개 레시피, 시작, 다음) 27) 퀴즈와 오답 노트 (예: 영어 단어 퀴즈 내줘, 오답 노트 퀴즈) 28) 모드 (예: 토론 연습 모드, 면접 연습 모드, 영어 회화 모드, 모드 해제) 29) 사전, 맞춤법 교정, 요약, 메일 초안, 아이디어 (그냥 말하면 됩니다) 30) 말투 (예: 자비스처럼 말해줘, 영화 말투로, 기본 말투로) 31) 말하는 속도 (예: 좀 더 천천히 말해줘, 속도 1.3배, 속도 기본으로) 32) 음성 (예: 고품질 음성 켜줘, 남자 목소리로 바꿔줘, 목소리 목록, 기본 음성으로 돌려줘) 33) 호칭 (예: 내 이름은 유찬이야, 나를 유찬님이라고 불러줘) 34) 투자 원칙서 (예: 원칙 추가 한 종목 비중 20퍼센트 이하, 원칙 목록, 원칙 2번 삭제, 원칙 예시) 35) 결정 일지 (예: 일지 기록 엔비디아 매수 10주 이유 데이터센터 수요, 일지 목록, 복기해줘) 36) 접속 인사 (예: 인사 꺼줘, 인사 켜줘). 왼쪽 사이드바에서 대화 목록, 검색, 빠른 실행, 내보내기를 쓸 수 있습니다. 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다. 37) 포트폴리오 연동(가져오기 후): 자산 현황, 원칙 점검, 리밸런싱, 이번 달 적립, 배당 얼마, 엔비디아 차트 1개월, 시장 요인 판단, 실적 일정. 시세는 종가 기준이고 Alpha Vantage 키가 필요합니다. 38) 오늘 정리 (예: 오늘 정리해줘: 일정·할 일·지원·지출·적립을 한 번에 점검) 39) 투자 기록 (예: 이번 달 적립 50만원 했어, KO 배당 3.2달러 들어왔어, 투자 기록) 40) 지원 단계 (예: 지원 1번 면접 10월 20일 오후 2시, 지원 일정) 41) 예산 (예: 월 예산 120만원, 예산 식비 30만원, 예산 현황) 42) 구글 캘린더 (예: 구글 클라이언트 ID 설정 ..., 구글 캘린더 연결, 구글 캘린더 일정 보여줘, 구글 캘린더 동기화 켜줘) 43) 손동작 (예: 손동작 켜줘, 손동작 꺼줘: 손바닥 좌우 손짓은 대화 넘기기, 말하는 중 손바닥 정지는 응답 중지, 검지 세우기는 듣기 시작, 엄지척은 확인, 엄지 내림은 취소, V자 유지는 위로 스크롤, V에서 검지·중지 한 마디 접기는 아래로 스크롤. 영상은 기기 안에서만 처리).";
+const HELP="할 수 있는 일: 1) 일반 질문과 대화 2) 시각·날짜 3) 타이머와 알림 (예: 10분 타이머, 오후 3시 30분에 알려줘) 4) 메모 5) 할 일 6) 미국 주가 (예: 엔비디아 주가, 관심종목 시세) 7) 종목 분석 (예: 엔비디아 분석해줘) 8) 날씨 (예: 부산 날씨, 내일 날씨, 도시 설정 부산) 9) 환율 (예: 환율, 100달러 얼마) 10) 계산 (예: 3500 곱하기 12 계산) 11) 상황 보고 (예: 브리핑) 12) 링크 열기 (유튜브 검색, 지도, 채용 검색) 13) 지원 관리 (예: 지원 추가 부산항만공사 마감 10월 20일, 지원 현황, 지원 1번 면접, 마감 임박) 14) 지출 기록 (예: 점심 8천원 썼어, 이번 달 지출, 지출 취소) 15) 보유 종목과 포트폴리오 점검 (예: 보유 추가 엔비디아 10주 평단 120달러, 보유 목록, 포트폴리오 점검) 16) 종목 데이터 분석 (예: 엔비디아 분석해줘) 17) 백업과 복원 (예: 백업, 복원) 18) 기억 (예: 기억해 줘 나는 부산에 산다, 기억 목록, 기억 삭제 1번) 19) 이미지나 PDF 분석 (화면에 끌어놓거나 붙여넣고 질문) 20) 번역과 통역 (예: 안녕하세요를 일본어로 말해줘, 영어 통역 모드, 통역 끝) 21) 단위와 시간대 (예: 10마일은 킬로미터로, 화씨 100도는 섭씨로, 뉴욕 지금 몇 시, 서울 오후 3시는 런던 몇 시) 22) 일정과 디데이 (예: 일정 추가 10월 20일 오후 2시 면접, 오늘 일정, 면접까지 며칠, 매일 오전 9시에 약 먹으라고 알려줘, 반복 알림 목록) 23) 루틴 타이머 (예: 뽀모도로 시작, 운동 타이머 30초 운동 10초 휴식 8세트, 명상 5분) 24) 길찾기와 근처 검색 (예: 서울역에서 부산역 가는 길, 근처 카페 찾아줘) 25) 음악과 영상 링크 (예: 아이유 노래 틀어줘) 26) 레시피 (예: 김치찌개 레시피, 시작, 다음) 27) 퀴즈와 오답 노트 (예: 영어 단어 퀴즈 내줘, 오답 노트 퀴즈) 28) 모드 (예: 토론 연습 모드, 면접 연습 모드, 영어 회화 모드, 모드 해제) 29) 사전, 맞춤법 교정, 요약, 메일 초안, 아이디어 (그냥 말하면 됩니다) 30) 말투 (예: 자비스처럼 말해줘, 영화 말투로, 기본 말투로) 31) 말하는 속도 (예: 좀 더 천천히 말해줘, 속도 1.3배, 속도 기본으로) 32) 음성 (예: 고품질 음성 켜줘, 남자 목소리로 바꿔줘, 목소리 목록, 기본 음성으로 돌려줘) 33) 호칭 (예: 내 이름은 유찬이야, 나를 유찬님이라고 불러줘) 34) 투자 원칙서 (예: 원칙 추가 한 종목 비중 20퍼센트 이하, 원칙 목록, 원칙 2번 삭제, 원칙 예시) 35) 결정 일지 (예: 일지 기록 엔비디아 매수 10주 이유 데이터센터 수요, 일지 목록, 복기해줘) 36) 접속 인사 (예: 인사 꺼줘, 인사 켜줘). 왼쪽 사이드바에서 대화 목록, 검색, 빠른 실행, 내보내기를 쓸 수 있습니다. 메모·할 일·설정은 이 기기의 브라우저에만 저장됩니다. 타이머는 이 탭이 열려 있을 때만 울립니다. 37) 포트폴리오 연동(가져오기 후): 자산 현황, 원칙 점검, 리밸런싱, 이번 달 적립, 배당 얼마, 엔비디아 차트 1개월, 시장 요인 판단, 실적 일정. 시세는 종가 기준이고 Alpha Vantage 키가 필요합니다. 38) 오늘 정리 (예: 오늘 정리해줘: 일정·할 일·지원·지출·적립을 한 번에 점검) 39) 투자 기록 (예: 이번 달 적립 50만원 했어, KO 배당 3.2달러 들어왔어, 투자 기록) 40) 지원 단계 (예: 지원 1번 면접 10월 20일 오후 2시, 지원 일정) 41) 예산 (예: 월 예산 120만원, 예산 식비 30만원, 예산 현황) 42) 구글 캘린더 (예: 구글 클라이언트 ID 설정 ..., 구글 캘린더 연결, 구글 캘린더 일정 보여줘, 구글 캘린더 동기화 켜줘) 43) 손동작 (예: 손동작 켜줘, 손동작 꺼줘: 손바닥 좌우 손짓은 대화 넘기기, 말하는 중 손바닥 정지는 응답 중지, 검지 세우기는 듣기 시작, 엄지척은 확인, 엄지 내림은 취소, V자 유지는 위로 스크롤, V에서 검지·중지 한 마디 접기는 아래로 스크롤. 영상은 기기 안에서만 처리) 44) 카메라 비서 (손동작이 켜져 있을 때: 1분 넘게 자리를 비우면 음성 대기를 멈추고 돌아오면 그동안 온 알림 정리, 2분 넘게 자세가 무너지면 경고, 손바닥 작게 흔들기는 듣기 시작. 예: 자세 기준 설정, 내 자세 어때, 자세 알림 꺼줘, 자리 감지 꺼줘).";
 const LIST=(a,e)=>a.length?a.map((x,i)=>(i+1)+"번 "+x).join(". "):e;
 const CITY={"서울":[37.5665,126.978],"부산":[35.1796,129.0756],"인천":[37.4563,126.7052],"대구":[35.8714,128.6014],"대전":[36.3504,127.3845],"광주":[35.1595,126.8526],"울산":[35.5384,129.3114],"세종":[36.48,127.289],"수원":[37.2636,127.0286],"창원":[35.228,128.6811],"제주":[33.4996,126.5312],"포항":[36.019,129.3435],"김해":[35.2285,128.8894],"성남":[37.42,127.1267],"고양":[37.6584,126.832],"용인":[37.2411,127.1776],"청주":[36.6424,127.489],"전주":[35.8242,127.148],"천안":[36.8151,127.1139],"여수":[34.7604,127.6622],"춘천":[37.8813,127.7298],"강릉":[37.7519,128.8761]};
 const WX={0:"맑음",1:"대체로 맑음",2:"구름 조금",3:"흐림",45:"안개",48:"안개",51:"약한 이슬비",53:"이슬비",55:"강한 이슬비",56:"어는 이슬비",57:"어는 이슬비",61:"약한 비",63:"비",65:"강한 비",66:"어는 비",67:"어는 비",71:"약한 눈",73:"눈",75:"강한 눈",77:"싸락눈",80:"약한 소나기",81:"소나기",82:"강한 소나기",85:"눈 소나기",86:"강한 눈 소나기",95:"뇌우",96:"우박 동반 뇌우",99:"강한 우박 동반 뇌우"};
@@ -1059,7 +1059,7 @@ function ext(t){
  if(QZ)return quizTurn(t);
  if(TR){if(/^통역\s*(모드\s*)?(끝|종료|그만|꺼|해제|중지)/.test(t))return(TR=null,"통역 모드를 종료했습니다.");return trans(t,TR.c,TR.n)}
  if(RC){const r=recipeTurn(t);if(r!==null)return r}
- {const g=gsCmd(t);if(g)return g}
+ {const g=gsCmd(t)||camCmd(t);if(g)return g}
  let m;
  if(/통역/.test(t)&&/(모드|시작|켜)/.test(t)&&!/(끝|종료|그만|해제)/.test(t)&&!/(번역|말해)/.test(t)){const lm=t.match(new RegExp("("+LNR+")"));if(!lm)return"어느 언어로 통역할까요? 예: 영어 통역 모드";clr();TR={c:LNG[lm[1]],n:lm[1]};return lm[1]+" 통역 모드입니다. 말씀하시는 내용을 "+lm[1]+"로 번역해 읽어 드립니다. 이 동안 모든 말이 번역됩니다. 끝내려면 통역 끝이라고 말씀하세요."}
  if(/통역\s*(모드\s*)?(끝|종료|그만|해제)/.test(t))return"켜져 있는 통역 모드가 없습니다.";
@@ -1477,9 +1477,11 @@ function capSet(t){try{const e=$("cap");if(!e)return;clearTimeout(capTm);t=Strin
   g.globalAlpha=1;g.globalCompositeOperation="source-over"}
  requestAnimationFrame(frame)})();
 /* ===== 손동작 인식: 카메라로 손을 추적해 좌우 손짓으로 대화를 넘기고 구체를 기울임 ===== */
-const MPB="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0",MPM="https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task";
+// 인식 라이브러리는 외부 CDN 대신 이 사이트에 직접 올린 사본(npm 무결성 확인)을 씀. 모델 파일은 실행 코드가 아닌 데이터라 구글 공식 저장소에서 받음
+const MPB=new URL("vendor/tasks-vision-1.1.0",location.href).href,MPP="https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",MPM="https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task";
 let GS=null,GSL=false,GSLIB=null,GSFS=null;
-const GSHELP="손바닥 좌우 손짓은 대화 넘기기, 말하는 중 손바닥을 0.5초 멈추면 응답 중지, 검지를 0.6초 세우면 듣기 시작, 엄지척은 확인, 엄지 내림은 취소, V자를 유지하면 위로, V에서 검지와 중지를 한 마디만 접으면 아래로 스크롤입니다.";
+const GSHELP="손바닥 좌우 손짓은 대화 넘기기, 말하는 중 손바닥을 0.5초 멈추면 응답 중지, 검지를 0.6초 세우면 듣기 시작, 엄지척은 확인, 엄지 내림은 취소, V자를 유지하면 위로, V에서 검지와 중지를 한 마디만 접으면 아래로 스크롤, 손바닥을 좌우로 작게 두세 번 흔들면 듣기 시작입니다.";
+const CAMHELP="카메라가 켜져 있는 동안 자리 비움 감지(1분 넘게 안 보이면 음성 대기를 멈추고, 돌아오면 그동안 온 알림을 정리)와 자세 알림(2분 넘게 자세가 무너지면 경고)도 작동합니다. 바르게 앉아 ‘자세 기준 설정’이라고 하면 기준을 다시 잡고, ‘자리 감지 꺼줘’, ‘자세 알림 꺼줘’로 끌 수 있습니다.";
 const gsMake=(fs,d)=>GSLIB.HandLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:MPM,delegate:d},runningMode:"VIDEO",numHands:1});
 // 그래픽 가속이 오히려 느린 기기(예: 소프트웨어 렌더링)는 CPU로 전환
 async function gsCpu(){const g=GS;if(!g||g.sw)return;g.sw=1;try{const lm=await gsMake(GSFS,"CPU");if(GS!==g){lm.close();return}const old=g.lm;g.lm=lm;g.dg="CPU";g.n=0;g.ms=0;try{old.close()}catch(_){}}catch(_){}}
@@ -1522,7 +1524,8 @@ function gsHold(ps,t,x,y,p){const G=GS;
 function gsGest(g){const hr=$("hr");
  if(g==="open"){cancelSpeech();hr.textContent="손바닥: 응답을 멈췄습니다";return}
  if(g==="up"||g==="down"){if(busy)return;if(!pend){hr.textContent="엄지: 지금은 확인할 항목이 없습니다";return}hr.textContent=g==="up"?"엄지척: 확인":"엄지 내림: 취소";ask(g==="up"?"확인":"취소");return}
- if(g==="point"){if(busy||talking())return;if(wake){act=true;arm();beep();hr.textContent="검지: 말씀하세요"}else if(!rec){$("mic").click();hr.textContent="검지: 듣고 있습니다"}}}
+ if(g==="point")gsListen("검지")}
+function gsListen(lb){const hr=$("hr");if(busy||talking())return;if(wake){act=true;arm();beep();hr.textContent=lb+": 말씀하세요"}else if(!rec){$("mic").click();hr.textContent=lb+": 듣고 있습니다"}}
 function handCenter(p){let x=0,y=0;[0,5,9,13,17].forEach(i=>{x+=p[i].x;y+=p[i].y});return[1-x/5,y/5]}
 function gsAct(dir){
  const rows=CV.list.slice().sort((a,b)=>b.u-a.u),i=rows.findIndex(c=>c.id===CV.cur),n=rows[i+dir];
@@ -1537,9 +1540,54 @@ function gsLoop(){if(!GS)return;GS.raf=requestAnimationFrame(gsLoop);const v=GS.
  if(v.readyState<2||v.currentTime===GS.vt||now-GS.lt<Math.min(200,Math.max(30,GS.ms*1.5)))return;GS.vt=v.currentTime;GS.lt=now;
  let r;const a0=performance.now();try{r=GS.lm.detectForVideo(v,now)}catch(e){return}
  const el=performance.now()-a0;GS.n++;if(GS.n>1)GS.ms=GS.ms?GS.ms*.8+el*.2:el;if(GS.dg==="GPU"&&GS.n>=4&&GS.ms>45)gsCpu();
- const p=r&&r.landmarks&&r.landmarks[0],t=now/1000;gsDraw(r);
- if(!p){GS.det(t,null);GS.hp=null;GS.sp=null;GS.sm=0;return}
- const[x,y]=handCenter(p);HAND={x,y,t:now};const ps=gsPose(p,GS.hp==="pinch"),d=GS.det(t,x,y,ps!=="pinch"&&handOpen(p));if(d){gsAct(d);GS.hp=null;return}gsHold(ps,t,x,y,p)}
+ const p=r&&r.landmarks&&r.landmarks[0],t=now/1000;gsDraw(r);camTick(now,!!p);
+ if(!p){GS.det(t,null);GS.hp=null;GS.sp=null;GS.sm=0;GS.wv=null;return}
+ const[x,y]=handCenter(p);HAND={x,y,t:now};const ps=gsPose(p,GS.hp==="pinch"),op=ps!=="pinch"&&handOpen(p),wv=waveTick(t,x,op);if(wv==="fire"){GS.hp=null;gsListen("손 흔들기");return}const d=GS.det(t,x,y,op&&wv!=="active");if(d){gsAct(d);GS.hp=null;return}gsHold(ps,t,x,y,p)}
+/* ===== 카메라 비서: 자리 비움 감지, 자세 알림, 손 흔들기 ===== */
+const PRES_SEC=60,POST_SEC=120;
+const camOpt=k=>L["f_c"+k]!=="0";
+async function camPose(){const G=GS;if(!G||G.ps||G.psl||!(camOpt("pres")||camOpt("post")))return;G.psl=1;
+ try{let ps=null;for(const d of[G.dg,"CPU"]){try{ps=await GSLIB.PoseLandmarker.createFromOptions(GSFS,{baseOptions:{modelAssetPath:MPP,delegate:d},runningMode:"VIDEO",numPoses:1});break}catch(e){if(d==="CPU")throw e}}
+  if(GS!==G){ps.close();return}G.ps=ps}catch(e){$("hr").textContent="자세 인식 모델을 불러오지 못해 자리 감지·자세 알림은 꺼둡니다."}finally{G.psl=0}}
+function camTick(now,hasHand){const G=GS;if(!G||!G.ps||now-(G.pt||0)<500)return;G.pt=now;const pr=camOpt("pres"),po=camOpt("post");if(!pr&&!po)return;
+ let r;try{r=G.ps.detectForVideo(G.v,now)}catch(_){return}const q=r&&r.landmarks&&r.landmarks[0],t=now/1000;
+ if(pr)presTick(t,!!q||hasHand);if(q&&po)postTick(t,q)}
+function presTick(t,here){const P=GS.pr||(GS.pr={seen:t,away:false,hc:0});
+ if(here){P.seen=t;if(P.away&&++P.hc>=2){P.away=false;presBack(t-P.at,P)}return}
+ P.hc=0;if(!P.away&&t-P.seen>=PRES_SEC){P.away=true;P.at=t;P.n0=$("log").children.length;P.wk=wake;if(wake)stopWake();$("hr").textContent="자리 비움: 음성 대기를 멈췄습니다"}}
+function presBack(dur,P){if(P.wk&&!wake){wake=true;paused=false;act=false;getLock();listen();ui()}
+ const els=[...$("log").children].slice(P.n0||0).filter(e=>/\b(f|e)\b/.test(e.className)).map(e=>e.textContent.replace(/\s+/g," ").slice(0,60)),min=Math.max(1,Math.round(dur/60));
+ const m=els.length?"돌아오셨습니다. 자리 비운 "+min+"분 동안 알림 "+els.length+"건이 있었습니다. "+els.slice(-3).join(" / "):dur>=300?"돌아오셨습니다. 자리 비운 "+min+"분 동안 새 알림은 없었습니다.":"";
+ if(m)say2(m);else $("hr").textContent="자리 복귀: 음성 대기를 다시 켰습니다"}
+function postTick(t,q){const vis=i=>q[i].visibility==null||q[i].visibility>.5;if(!(vis(0)&&vis(11)&&vis(12)))return;
+ const sw=Math.hypot(q[11].x-q[12].x,q[11].y-q[12].y);if(sw<.05)return;
+ const r=((q[11].y+q[12].y)/2-q[0].y)/sw,tilt=Math.abs(Math.atan((q[11].y-q[12].y)/((q[11].x-q[12].x)||1e-6)))*57.3,S=GS.po||(GS.po={buf:[],warnT:-1e9});
+ const med=a=>a.slice().sort((x,y)=>x-y)[a.length>>1];
+ if(S.cal){S.cal.push(r);if(S.cal.length>=8){L.f_pbase=med(S.cal).toFixed(3);S.cal=null;S.buf=[];say2("자세 기준을 저장했습니다. 이 자세를 바른 자세로 보고, 앞으로 기울어지면 알려 드리겠습니다.")}return}
+ const B=+L.f_pbase||0;
+ if(!B){(S.auto=S.auto||[]).push(r);if(S.auto.length>=20){L.f_pbase=med(S.auto).toFixed(3);S.auto=null;$("hr").textContent="자세 기준을 자동으로 잡았습니다. 바르게 앉아 ‘자세 기준 설정’이라고 하면 다시 잡습니다"}return}
+ const bad=r<B*.78||tilt>12;S.last={r,B,tilt,bad};S.buf.push([t,bad]);while(S.buf.length&&t-S.buf[0][0]>POST_SEC)S.buf.shift();
+ if(t-S.buf[0][0]>=POST_SEC*.95&&S.buf.filter(x=>x[1]).length/S.buf.length>=.8&&t-S.warnT>1200&&!busy&&!talking()){S.warnT=t;S.buf=[];
+  say2("자세가 "+Math.round(POST_SEC/60)+"분 넘게 무너져 있습니다. "+(tilt>12?"어깨가 한쪽으로 기울어 있습니다. ":"고개와 상체가 화면 쪽으로 나와 있습니다. ")+"허리를 펴고 화면에서 조금 떨어지세요.")}}
+// 손바닥을 좌우로 작게 흔들기: 1.6초 안에 방향 전환 3번 → 듣기 시작
+function waveTick(t,x,open){const W=GS.wv||(GS.wv={ex:x,dir:0,rev:[],cd:-9});
+ if(!open){W.ex=x;W.dir=0;W.rev=[];return""}
+ if(!W.dir){if(Math.abs(x-W.ex)>.03){W.dir=Math.sign(x-W.ex);W.ex=x}}
+ else if((x-W.ex)*W.dir>0)W.ex=x;
+ else if(Math.abs(x-W.ex)>.035){W.rev.push(t);W.dir=-W.dir;W.ex=x}
+ while(W.rev.length&&t-W.rev[0]>1.6)W.rev.shift();
+ if(W.rev.length>=3&&t-W.cd>3){W.rev=[];W.cd=t;return"fire"}
+ return W.rev.length&&t-W.rev[W.rev.length-1]<.8?"active":""}
+function camCmd(t){if(/(뭐야|뭔데|뜻|설명\s*해)/.test(t))return null;
+ const off=/(꺼|끄|끔|중지|해제|그만|off)/i.test(t),on=/(켜|시작|실행|활성|on)/i.test(t);
+ const tog=(k,name,eun,eul)=>{if(!off&&!on)return name+eun+(camOpt(k)?" 켜져 있습니다.":" 꺼져 있습니다.")+(GS?"":" 손동작(카메라)이 꺼져 있어 지금은 작동하지 않습니다.");
+  L["f_c"+k]=off?"0":"1";if(off)return name+eul+" 껐습니다.";if(GS){camPose();return name+eul+" 켰습니다."}return gsOn().then(m=>name+eul+" 켰습니다. "+m)};
+ if(/^자리\s*(비움\s*)?(감지|인식)/.test(t))return tog("pres","자리 비움 감지","는","를");
+ if(/^자세\s*(알림|경고|감지|인식)/.test(t))return tog("post","자세 알림","은","을");
+ if(/^자세\s*기준/.test(t)){if(!GS)return"먼저 ‘손동작 켜줘’로 카메라를 켜 주세요.";if(!camOpt("post"))L.f_cpost="1";camPose();(GS.po=GS.po||{buf:[],warnT:-1e9}).cal=[];return"바르게 앉은 자세를 4초 동안 유지하세요. 기준을 잡으면 알려 드리겠습니다."}
+ if(/^(자세\s*(상태|어때|점검)|내\s*자세)/.test(t)){const s=GS&&GS.po&&GS.po.last;if(!s)return"아직 자세 정보가 없습니다. 카메라에 어깨까지 보이게 앉아 주세요.";
+  return"현재 자세는 기준 대비 "+Math.round(s.r/s.B*100)+"%, 어깨 기울기 "+Math.round(s.tilt)+"도입니다. "+(s.bad?"무너진 상태입니다.":"정상 범위입니다.")+" 기준 78% 미만이거나 기울기 12도 초과가 2분 넘게 이어지면 알려 드립니다."}
+ return null}
 function gsBtn(){const b=$("gs");if(b){b.classList.toggle("on",!!GS);b.textContent=GSL?"준비 중":"손동작";b.setAttribute("aria-pressed",GS?"true":"false")}}
 async function gsOn(){
  if(GS)return"손동작 인식은 이미 켜져 있습니다.";if(GSL)return"손동작 인식을 준비하고 있습니다.";
@@ -1551,20 +1599,20 @@ async function gsOn(){
    if(n==="NotReadableError"||n==="OverconstrainedError"||n==="AbortError"){try{await new Promise(r=>setTimeout(r,600));st=await navigator.mediaDevices.getUserMedia({video:true,audio:false});n=""}catch(e2){n=(e2&&e2.name)||n;e=e2}}
    if(!st)return n==="NotAllowedError"?"카메라 권한이 거부되었습니다. 주소창 왼쪽 아이콘에서 카메라를 허용한 뒤 다시 말씀하세요.":n==="NotFoundError"?"카메라를 찾지 못했습니다.":n==="NotReadableError"?"카메라가 다른 프로그램에서 사용 중이라 켜지 못했습니다. 손짓 제어 프로그램(friday_gesture), 화상회의, Windows 카메라 앱, 다른 브라우저 탭을 닫고 다시 시도하세요. 계속 안 되면 Windows 설정 > 개인 정보 > 카메라에서 데스크톱 앱 카메라 접근이 켜져 있는지 확인하세요.":"카메라를 켜지 못했습니다: "+((e&&e.message)||n)}
   let lm=null,dg="CPU";
-  try{GSLIB=GSLIB||await import(MPB+"/vision_bundle.mjs");const fs=GSFS=GSFS||await GSLIB.FilesetResolver.forVisionTasks(MPB+"/wasm");
+  try{GSLIB=GSLIB||await import(MPB+"/vision_bundle.js");const fs=GSFS=GSFS||await GSLIB.FilesetResolver.forVisionTasks(MPB+"/wasm");
    for(const d of["GPU","CPU"]){try{lm=await gsMake(fs,d);dg=d;break}catch(e){if(d==="CPU")throw e}}}
   catch(e){st.getTracks().forEach(k=>k.stop());return"손 인식 모델을 불러오지 못했습니다. 네트워크를 확인하세요. ("+((e&&e.message)||e)+")"}
   const box=document.createElement("div");box.id="gsv";box.setAttribute("aria-label","손동작 카메라 미리보기");
   const v=document.createElement("video");v.muted=true;v.playsInline=true;v.setAttribute("playsinline","");const cv=document.createElement("canvas");box.append(v,cv);$("stage").append(box);
   v.srcObject=st;try{await v.play()}catch(_){}
-  GS={st,lm,v,cv,box,dg,det:swipeDet(),vt:-1,lt:0,raf:0,ms:0,n:0};gsLoop();
-  return"손동작 인식을 켰습니다. "+GSHELP+" 영상은 이 기기 안에서만 처리합니다."}
+  GS={st,lm,v,cv,box,dg,det:swipeDet(),vt:-1,lt:0,raf:0,ms:0,n:0};gsLoop();camPose();
+  return"손동작 인식을 켰습니다. "+GSHELP+" "+CAMHELP+" 영상은 이 기기 안에서만 처리하고 어디에도 보내지 않습니다."}
  finally{GSL=false;if(!GS&&st&&st.active)st.getTracks().forEach(k=>k.stop());gsBtn()}}
-function gsOff(){if(!GS)return"손동작 인식은 꺼져 있습니다.";const g=GS;GS=null;HAND=null;cancelAnimationFrame(g.raf);try{g.st.getTracks().forEach(k=>k.stop())}catch(_){}try{g.lm.close()}catch(_){}g.box.remove();gsBtn();return"손동작 인식을 껐습니다. 카메라도 꺼졌습니다."}
+function gsOff(){if(!GS)return"손동작 인식은 꺼져 있습니다.";const g=GS;GS=null;HAND=null;cancelAnimationFrame(g.raf);try{g.st.getTracks().forEach(k=>k.stop())}catch(_){}try{g.lm.close()}catch(_){}try{g.ps&&g.ps.close()}catch(_){}if(g.pr&&g.pr.away&&g.pr.wk&&!wake){wake=true;paused=false;act=false;getLock();listen();ui()}g.box.remove();gsBtn();return"손동작 인식을 껐습니다. 카메라도 꺼졌습니다."}
 function gsCmd(t){if(/(뭐야|뭔데|뭐지|뜻|설명\s*해|어떻게\s*만들|가능해|가능한가)/.test(t))return null;if(!/^(손\s*동작|손\s*제스처|제스처|모션\s*(캡처|인식)?|손짓)/.test(t))return null;
  if(/(꺼|끄|끔|종료|중지|해제|그만|off)/i.test(t))return gsOff();
  if(/(켜|시작|실행|활성|on)/i.test(t))return gsOn();
- return(GS?"손동작 인식이 켜져 있습니다. ":"손동작 인식은 꺼져 있습니다. ")+"‘손동작 켜줘’ 또는 ‘손동작 꺼줘’라고 말씀하세요. "+GSHELP}
+ return(GS?"손동작 인식이 켜져 있습니다. ":"손동작 인식은 꺼져 있습니다. ")+"‘손동작 켜줘’ 또는 ‘손동작 꺼줘’라고 말씀하세요. "+GSHELP+" "+CAMHELP}
 $("gs").onclick=()=>{if(GS)add("f",gsOff());else gsOn().then(m=>add(GS?"f":"e",m))};gsBtn();
 function VEL(){try{return({gemini:"Gemini",azure:"Azure",browser:"기본"})[engOf("ko-KR")]+" "+rate().toFixed(2)+"배"}catch(_){return"기본"}}
 function hud(){try{const d=new Date(),n=timers.filter(x=>x.end>Date.now()).length,ev=EV().filter(e=>dd(e.d)===0).length,sub=[n?"타이머 "+n+"개":"",ev?"오늘 일정 "+ev+"개":"","음성 "+VEL()].filter(Boolean).join("\n");
