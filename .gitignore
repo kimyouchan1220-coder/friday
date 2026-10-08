@@ -1,3 +1,5 @@
 gesture/hand_landmarker.task
 __pycache__/
 gesture/bridge_token.txt
+gesture/bridge.log
+gesture/bridge.log.old

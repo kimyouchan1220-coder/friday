@@ -1668,7 +1668,7 @@ function winCmd(t){
 /* ===== 노트북 연결 프로그램(friday_bridge.py): 앱 열기·끄기 =====
  노트북 안(127.0.0.1)에서 도는 프로그램에 명령을 보냄. 처음 한 번 연결 코드로 짝을 맺고 받은 토큰을 이 기기에만 저장 */
 const BRU="http://127.0.0.1:47213";let BRON=false,BRAPPS=[];
-const BRHELP="앱 끄기와 바로 열기는 노트북 연결 프로그램이 있어야 합니다. 손짓 제어 프로그램 폴더의 start_bridge.bat를 실행하면 창에 6자리 연결 코드가 나옵니다. 그 코드로 ‘노트북 연결 123456’처럼 말하거나 입력하세요. 크롬이 ‘내 컴퓨터(로컬 네트워크)에 접근’ 허용을 물으면 허용을 누르세요.";
+const BRHELP="앱 끄기와 바로 열기는 노트북 연결 프로그램이 있어야 합니다. friday_laptop 폴더의 start_bridge_hidden.bat(창 없이) 또는 start_bridge.bat(창 표시)를 실행하면 6자리 연결 코드가 나옵니다. 그 코드로 ‘연결 코드 123456’처럼 말하거나 입력하세요. 크롬이 ‘내 컴퓨터(로컬 네트워크)에 접근’ 허용을 물으면 허용을 누르세요.";
 async function brReq(path,body){const o={method:body?"POST":"GET",headers:{"Content-Type":"application/json","X-Friday-Token":L.f_brtok||""}};if(body)o.body=JSON.stringify(body);
  try{if(AbortSignal.timeout)o.signal=AbortSignal.timeout(9000)}catch(_){}
  const r=await fetch(BRU+path,o);let j={};try{j=await r.json()}catch(_){}if(r.status===401)BRON=false;return{st:r.status,j}}
@@ -1693,8 +1693,10 @@ function brCmd0(t){
  let m=null;{const kn={"공":"0","영":"0","일":"1","이":"2","삼":"3","사":"4","오":"5","육":"6","륙":"6","칠":"7","팔":"8","구":"9"};
   const t2=t.replace(/\s*(이야|입니다|이에요|예요|야)\s*[.!]*$/,"");const mm=t2.match(/^(?:(?:노트북|컴퓨터|pc|브릿지|연결\s*프로그램)\s*)?연결\s*(?:코드\s*)?(?:는\s*|은\s*)?([0-9공영일이삼사오육륙칠팔구\s\-]{6,20})(?:이야|입니다|야|이에요|예요)?\s*[.!]*$/i);
   if(mm){const d=mm[1].replace(/[\s\-]/g,"").replace(/[공영일이삼사오육륙칠팔구]/g,c=>kn[c]);if(/^\d{6}$/.test(d))m=[0,0,d]}}
- if(m)return(async()=>{try{const{st,j}=await brReq("/pair",{code:m[2]});if(st!==200||!j.token)return j.error||"연결 코드가 맞지 않습니다.";L.f_brtok=j.token;await brPing();return"노트북과 연결했습니다. 이제 ‘디스코드 켜줘’, ‘카카오톡 꺼줘’처럼 말하면 됩니다. 앱은 크롬 허용 창 없이 바로 열립니다."}
+ if(m)return(async()=>{try{const{st,j}=await brReq("/pair",{code:m[2]});if(st!==200||!j.token)return j.error||"연결 코드가 맞지 않습니다. ‘연결 코드 보여줘’라고 하면 노트북 화면에 새 코드를 띄웁니다.";L.f_brtok=j.token;await brPing();return"노트북과 연결했습니다. 이제 ‘디스코드 켜줘’, ‘카카오톡 꺼줘’처럼 말하면 됩니다. 앱은 크롬 허용 창 없이 바로 열립니다."}
   catch(e){return"연결 프로그램에 닿지 않습니다. start_bridge.bat를 켜 두었는지, 크롬이 묻는 ‘로컬 네트워크 접근’을 허용했는지 확인하세요."}})();
+ if(/^(노트북\s*)?연결\s*프로그램\s*(을|를)?\s*(꺼|끄|종료|닫)/.test(t)){if(!L.f_brtok)return"연결 프로그램과 연결된 적이 없습니다.";return brReq("/shutdown",{}).then(({st,j})=>{BRON=false;return st===200?"노트북 연결 프로그램을 종료했습니다. 다시 켜려면 start_bridge_hidden.bat를 실행하세요.":(j.error||"종료하지 못했습니다.")}).catch(()=>{BRON=false;return"연결 프로그램이 이미 꺼져 있습니다."})}
+ if(/^(노트북\s*)?연결\s*코드\s*(를|좀)?\s*(보여|알려|띄워|다시)/.test(t))return brReq("/showcode",{}).then(()=>"노트북 화면에 연결 코드 알림창을 띄웠습니다. 그 코드로 ‘연결 코드 123456’처럼 말씀하세요.").catch(()=>"연결 프로그램이 꺼져 있습니다. start_bridge_hidden.bat 또는 start_bridge.bat를 실행하세요.");
  if(/^(노트북|컴퓨터|pc)\s*연결\s*(해제|끊어|삭제|지워)/i.test(t)){delete L.f_brtok;BRON=false;return"노트북 연결을 해제했습니다. 이 기기에 저장된 연결 정보를 지웠습니다."}
  if(/^(노트북|컴퓨터|pc)\s*연결\s*(상태|확인|됐어|돼\s*있어)/i.test(t))return brPing().then(ok=>ok?"노트북 연결 프로그램과 연결되어 있습니다. 찾은 앱 "+BRAPPS.length+"개.":L.f_brtok?"연결 정보는 있지만 프로그램에 닿지 않습니다. start_bridge.bat가 켜져 있는지 확인하세요.":"아직 연결하지 않았습니다. "+BRHELP);
  if(/^(노트북|컴퓨터|pc)\s*연결(\s*(방법|하는\s*법|어떻게))?\s*[?]?$/i.test(t))return BRHELP;

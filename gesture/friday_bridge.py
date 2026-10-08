@@ -9,8 +9,9 @@ Friday 웹사이트가 "디스코드 켜줘 / 꺼줘" 같은 명령을 이 프�
 - 임의의 명령은 실행하지 않습니다. 바탕화면·시작 메뉴 바로가기와 정해 둔 Windows 기본 앱만 열고 닫습니다.
 - 시스템 프로세스와 웹 브라우저(Friday가 그 안에서 돌기 때문)는 끄지 않습니다.
 
-실행: start_bridge.bat (또는 python friday_bridge.py)
-옵션: --reset  연결을 초기화(기존 토큰 무효)하고 새 코드 발급
+실행: start_bridge.bat (창이 보이는 방식) 또는 install_autostart.bat (창 없이, 로그인할 때 자동 시작)
+옵션: --reset   연결을 초기화(기존 토큰 무효)하고 새 코드 발급
+      --hidden  창 없이 실행(기록은 bridge.log). 연결 코드는 작은 알림창으로 표시
 """
 import json
 import os
@@ -271,11 +272,47 @@ class Auth:
         return bool(self.token and tok and secrets.compare_digest(tok, self.token))
 
 
-def show_code(auth):
-    print(f"\n  연결 코드: {auth.code}   (Friday에 '노트북 연결 {auth.code}'라고 말하거나 입력, 10분 유효)\n", flush=True)
+LOG_FILE = os.path.join(HERE, "bridge.log")
+QUIET = sys.stdout is None or "--hidden" in sys.argv  # pythonw(창 없음)로 실행되면 화면 출력이 없음
 
 
-def make_handler(apps, auth, log=print):
+def out(msg):
+    """화면이 있으면 출력하고, 항상 bridge.log에도 남김(창 없이 돌 때 확인용)"""
+    if not QUIET:
+        try:
+            print(msg, flush=True)
+        except Exception:
+            pass
+    try:
+        if os.path.exists(LOG_FILE) and os.path.getsize(LOG_FILE) > 200_000:
+            os.replace(LOG_FILE, LOG_FILE + ".old")
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S ") + msg.strip() + "\n")
+    except OSError:
+        pass
+
+
+def popup(text, title="Friday 노트북 연결"):
+    """창 없이 돌 때 연결 코드를 알림창으로 보여줌 (응답을 막지 않도록 별도 스레드)"""
+    if sys.platform != "win32":
+        return
+    def run():
+        try:
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(0, text, title, 0x40 | 0x40000)  # 정보 아이콘 + 맨 앞
+        except Exception:
+            pass
+    threading.Thread(target=run, daemon=True).start()
+
+
+def show_code(auth, force_popup=False):
+    msg = f"연결 코드: {auth.code}   (Friday에 '연결 코드 {auth.code}'라고 말하거나 입력, 10분 유효)"
+    out("\n  " + msg + "\n")
+    if QUIET and (force_popup or not auth.token):
+        popup(msg)
+
+
+def make_handler(apps, auth, log=out, on_shutdown=None):
     class H(BaseHTTPRequestHandler):
         server_version = "FridayBridge/" + VERSION
 
@@ -343,6 +380,13 @@ def make_handler(apps, auth, log=print):
 
         def do_POST(self):
             b = self._body()
+            if self.path == "/showcode":  # Friday에서 '연결 코드 보여줘' — 코드는 이 컴퓨터 화면에만 뜸
+                if not self._gate(False):
+                    return
+                if time.time() - auth.code_t > 600:
+                    auth.new_code()
+                show_code(auth, force_popup=True)
+                return self._send(200, {"ok": True, "shown": True})
             if self.path == "/pair":
                 if not self._gate(False):
                     return
@@ -365,6 +409,12 @@ def make_handler(apps, auth, log=print):
                     ok, msg = apps.open(app)
                     log(("열기: " if ok else "열기 실패: ") + app)
                     return self._send(200 if ok else 404, {"ok": ok, "msg": msg})
+                if self.path == "/shutdown":
+                    log("Friday 요청으로 종료합니다.")
+                    self._send(200, {"ok": True, "msg": "노트북 연결 프로그램을 종료했습니다."})
+                    if on_shutdown:
+                        threading.Thread(target=on_shutdown, daemon=True).start()
+                    return
                 if self.path == "/close":
                     app = (b.get("app") or "").strip()[:60]
                     ok, msg = apps.close(app, bool(b.get("force")))
@@ -385,26 +435,29 @@ def main():
     if reset and os.path.exists(TOKEN_FILE):
         os.remove(TOKEN_FILE)
     if sys.platform != "win32":
-        print("이 프로그램은 Windows용입니다.")
+        out("이 프로그램은 Windows용입니다.")
         return 1
     auth = Auth(reset)
     apps = Apps(WinOS())
+    holder = {}
     try:
-        srv = ThreadingHTTPServer((HOST, PORT), make_handler(apps, auth))
+        srv = ThreadingHTTPServer((HOST, PORT), make_handler(apps, auth, on_shutdown=lambda: holder["srv"].shutdown()))
+        holder["srv"] = srv
     except OSError:
-        print(f"포트 {PORT}를 이미 쓰고 있습니다. 연결 프로그램이 이미 켜져 있는지 확인하세요.")
+        out(f"포트 {PORT}를 이미 쓰고 있습니다. 연결 프로그램이 이미 켜져 있는지 확인하세요.")
         return 1
-    print(f"프라이데이 노트북 연결 프로그램 {VERSION} 실행 중 (이 컴퓨터 안에서만 접속 가능)")
-    print(f"찾은 앱 바로가기: {len(apps.shortcuts())}개")
+    out(f"프라이데이 노트북 연결 프로그램 {VERSION} 실행 중 (이 컴퓨터 안에서만 접속 가능){' - 창 없이 실행' if QUIET else ''}")
+    out(f"찾은 앱 바로가기: {len(apps.shortcuts())}개")
     if auth.token:
-        print("이미 Friday와 연결된 적이 있습니다. 새로 연결하려면 아래 코드를 쓰세요.")
+        out("이미 Friday와 연결된 적이 있어 코드 없이 바로 쓸 수 있습니다. 새로 연결하려면 아래 코드를 쓰세요.")
     show_code(auth)
-    print("이 창을 닫으면 연결이 끊깁니다. 종료: Ctrl+C")
+    if not QUIET:
+        out("이 창을 닫으면 연결이 끊깁니다. 종료: Ctrl+C. 창 없이 자동으로 켜지게 하려면 install_autostart.bat를 실행하세요.")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
         pass
-    print("종료했습니다.")
+    out("종료했습니다.")
     return 0
 
 
